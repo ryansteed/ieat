@@ -1,6 +1,17 @@
-**Status:** Archive (code is provided as-is, no updates expected)
+# GPT Image Bias experiments
 
-# image-gpt
+Ryan Steed, Aylin Caliskan
+
+Accompanying Co-Lab scripts:
+
+- https://gist.github.com/ryansteed/e851c7aadba7b7f2a5f2415aebe136c7
+- https://gist.github.com/ryansteed/d643203edc7a29ed960f7ce6377baa42
+
+
+
+
+
+# image-gpt documentation
 
 Code and models from the paper ["Generative Pretraining from Pixels"](https://cdn.openai.com/papers/Generative_Pretraining_from_Pixels_V2.pdf).
 
