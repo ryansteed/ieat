@@ -1,3 +1,6 @@
 [submodule "image-gpt"]
 	path = image-gpt
 	url = https://github.com/openai/image-gpt
+[submodule "weat"]
+	path = weat
+	url = https://github.com/ryansteed/weat
