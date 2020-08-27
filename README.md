@@ -2,10 +2,13 @@
 
 Ryan Steed, Aylin Caliskan
 
-Accompanying Co-Lab scripts:
+## Colab
 
-- https://gist.github.com/ryansteed/e851c7aadba7b7f2a5f2415aebe136c7
-- https://gist.github.com/ryansteed/d643203edc7a29ed960f7ce6377baa42
+This repo uses Colab scripts (iGPT requires high GPU to run).
+
+To open a `.ipynb` file in Colab, navigate to Colab's [Github Interface](http://colab.research.google.com/github) and search for this repo.
+
+To save changes, choose Save -> Save to Github.
 
 ## Instructions for Image GPT
 
