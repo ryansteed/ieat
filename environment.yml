@@ -1,0 +1,12 @@
+name: image-gpt-bias
+channels:
+  - conda-forge
+  - anaconda-fusion
+  - defaults
+dependencies:
+  - python=3.8
+  - pip
+  - pip:
+    - jupyter
+    - pandas
+
