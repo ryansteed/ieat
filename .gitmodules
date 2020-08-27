@@ -1,0 +1,3 @@
+[submodule "image-gpt"]
+	path = image-gpt
+	url = https://github.com/openai/image-gpt
