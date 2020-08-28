@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class EmbeddingExtractor:
@@ -47,7 +47,7 @@ class EmbeddingExtractor:
 		model_path = "%s/%s/model.ckpt-1000000.index"%(models_dir, model_size)
 		self.model = ImageGPT2LMHeadModel.from_pretrained(model_path,from_tf=True,config=config)
 
-	def extract(self, image_paths, output_path, gpu=False):
+	def extract(self, image_paths, output_path=None, gpu=False):
 		samples = self.process_samples(image_paths)
 		with torch.no_grad(): # saves some memory
 			# initialize with SOS token
@@ -64,12 +64,17 @@ class EmbeddingExtractor:
 
 			enc_last = enc[:, -1, :].numpy() if not gpu else enc[:, -1, :].cpu().numpy()  # extract the rep of the last input, as in sent-bias
 
-			# add the image names to the CSV file
 			df = pd.DataFrame(enc_last)
 			df["img"] = [os.path.basename(path) for path in image_paths]
-			df.to_csv(output_path)
+			
+			if output_path is not None:
+				# add the image names to the CSV file
+				df.to_csv(output_path)
+
+			return df.set_index("img")
 
 	def process_samples(self, image_paths, visualize=False):
+		for path in image_paths: assert os.path.exists(path), "ERR: %s is not a valid path." % path
 		x = resize(self.n_px, image_paths)
 		x_norm = normalize_img(x) #normalize pixels values to -1 to +1
 		samples = color_quantize_np(x_norm, self.clusters).reshape(x_norm.shape[:-1]) #map pixels to closest color cluster
