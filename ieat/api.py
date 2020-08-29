@@ -33,7 +33,8 @@ def test(
 	
 	input_dirs = [X, Y, A, B]
 	for d in input_dirs: assert os.path.exists(d), "%s is not a valid path." % d
-	if embedding_path is None: embedding_path = "embeddings/{}.csv".format(os.path.basename(os.path.dirname(X)))
+	if embedding_path is None: 
+		embedding_path = "embeddings/{}_{}.csv".format(os.path.basename(os.path.dirname(X)), model_size)
 
 	# get the embeddings
 	encs = None
