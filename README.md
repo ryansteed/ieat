@@ -19,5 +19,5 @@ conda activate image-gpt-bias
 # install the weat package locally
 pip install -e weat
 # install the ieat package locally
-pip install -e ieat
+pip install -e .
 ```
