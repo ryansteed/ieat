@@ -66,6 +66,7 @@ class EmbeddingExtractor:
 
 			df = pd.DataFrame(enc_last)
 			df["img"] = [os.path.basename(path) for path in image_paths]
+			df["category"] = [os.path.basename(os.path.dirname(path)) for path in image_paths]
 			
 			if output_path is not None:
 				# add the image names to the CSV file

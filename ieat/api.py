@@ -56,10 +56,11 @@ def test(
 		]
 		encs = extractor.extract(image_paths, output_path=embedding_path)
 	assert encs is not None, "Embeddings could not be extracted."
+	encs = encs.drop(columns=["category"])
 
 	# run the test
 	logger.info("Running test")
-	logger.setLevel(logging.INFO) 
+	logger.setLevel(logging.INFO)
 	embeddings = [
 		encs.loc[[f for f in os.listdir(d) if os.path.splitext(f)[1] in file_types]] 
 		for d in input_dirs
