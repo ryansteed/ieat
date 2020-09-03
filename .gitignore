@@ -3,3 +3,4 @@ ieat.egg-info
 models/*
 clusters/*
 ieat/__pycache__
+data/cifar*
