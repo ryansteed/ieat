@@ -47,8 +47,8 @@ class EmbeddingExtractor:
 		model_path = "%s/%s/model.ckpt-1000000.index"%(models_dir, model_size)
 		self.model = ImageGPT2LMHeadModel.from_pretrained(model_path,from_tf=True,config=config)
 
-	def extract(self, image_paths, output_path=None, gpu=False):
-		samples = self.process_samples(image_paths)
+	def extract(self, image_paths, output_path=None, gpu=False, **process_kwargs):
+		samples = self.process_samples(image_paths, **process_kwargs)
 		with torch.no_grad(): # saves some memory
 			# initialize with SOS token
 			context = np.concatenate( 
@@ -76,7 +76,9 @@ class EmbeddingExtractor:
 
 	def process_samples(self, image_paths, visualize=False):
 		for path in image_paths: assert os.path.exists(path), "ERR: %s is not a valid path." % path
+		# print("Num paths: %s" % len(image_paths))
 		x = resize(self.n_px, image_paths)
+		# print("X shape: ", x.shape)
 		x_norm = normalize_img(x) #normalize pixels values to -1 to +1
 		samples = color_quantize_np(x_norm, self.clusters).reshape(x_norm.shape[:-1]) #map pixels to closest color cluster
 		
@@ -90,7 +92,7 @@ class EmbeddingExtractor:
 			for img, ax in zip(samples_img, axes):
 				ax.axis('off')
 				ax.imshow(img)
-
+		# print("Shape of samples: ", samples.shape)
 		return samples
 
 

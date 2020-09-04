@@ -11,9 +11,10 @@ import pandas as pd
 def test(
 	X, Y, A, B, 
 	model_size, models_dir, clusters_dir, n_px,
-	file_types=[".jpg"],
+	file_types=[".jpg", ".jpeg", ".png", ".webp"],
 	embedding_path=None,
 	from_cache=True,
+	verbose=True,
 	**test_params
 ):
 	"""
@@ -54,16 +55,15 @@ def test(
 			os.path.join(d, f) for d in input_dirs for f in os.listdir(d) 
 			if os.path.splitext(f)[1] in file_types
 		]
-		encs = extractor.extract(image_paths, output_path=embedding_path)
+		encs = extractor.extract(image_paths, output_path=embedding_path, visualize=verbose)
 	assert encs is not None, "Embeddings could not be extracted."
-	encs = encs.drop(columns=["category"])
+	encs = encs.set_index(["category"], append=True).swaplevel("img", "category")
 
 	# run the test
 	logger.info("Running test")
 	logger.setLevel(logging.INFO)
 	embeddings = [
-		encs.loc[[f for f in os.listdir(d) if os.path.splitext(f)[1] in file_types]] 
-		for d in input_dirs
+		encs.loc[cat] for cat in encs.index.get_level_values("category").unique()
 	]
 	test = Test(*embeddings, names=[os.path.basename(d) for d in input_dirs])
 	return test.run(**test_params)
