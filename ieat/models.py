@@ -24,11 +24,13 @@ logger = logging.getLogger()
 class EmbeddingExtractor:
 	MODELS={"l":(1536,16,48),"m":(1024,8,36),"s":(512,8,24)} 
 
-	def __init__(self, model_size, models_dir, color_clusters_dir, n_px):
+	def __init__(self, model_size, models_dir, color_clusters_dir, n_px, from_cache=True):
 		"""
 		:param model_dir: path to a directory containing the model with the parameters specified
 		"""
 		self.n_px = n_px
+		self.model_size = model_size
+		self.from_cache = from_cache
 
 		color_clusters_file = "%s/kmeans_centers.npy"%(color_clusters_dir)
 		self.clusters = np.load(color_clusters_file) #get color clusters
@@ -66,13 +68,42 @@ class EmbeddingExtractor:
 
 			df = pd.DataFrame(enc_last)
 			df["img"] = [os.path.basename(path) for path in image_paths]
-			df["category"] = [os.path.basename(os.path.dirname(path)) for path in image_paths]
+
+			# DEPRECATED - NOW THAT CACHE IS STORED BY CATEGORY
+			# df["category"] = [os.path.basename(os.path.dirname(path)) for path in image_paths]
 			
 			if output_path is not None:
 				# add the image names to the CSV file
 				df.to_csv(output_path)
 
 			return df.set_index("img")
+
+	def extract_dir(self, d, file_types, visualize=False, **extract_params):
+		embedding_path = "embeddings/{}_{}_{}_{}.csv".format(
+			os.path.basename(os.path.dirname(d)), 
+			os.path.basename(d),
+			self.model_size,
+			self.n_px
+		)
+		image_paths = [
+			os.path.join(d, f) for f in os.listdir(d)
+			if os.path.splitext(f)[1] in file_types
+		]
+		if self.from_cache and os.path.exists(embedding_path):
+			logger.info("Loading embeddings for %s from file" % os.path.basename(d))
+			encs = pd.read_csv(embedding_path, index_col=0).set_index("img")
+			if (visualize):
+				self.process_samples(image_paths, visualize=True)
+		else:
+			logger.info("Extracting embeddings for %s" % os.path.basename(d))
+			# suppress annoying logger output
+			encs = self.extract(
+				image_paths, 
+				output_path=embedding_path, 
+				visualize=visualize, 
+				**extract_params
+			)
+		return encs
 
 	def process_samples(self, image_paths, visualize=False):
 		for path in image_paths: assert os.path.exists(path), "ERR: %s is not a valid path." % path
@@ -83,6 +114,7 @@ class EmbeddingExtractor:
 		samples = color_quantize_np(x_norm, self.clusters).reshape(x_norm.shape[:-1]) #map pixels to closest color cluster
 		
 		if visualize:
+			print(os.path.basename(os.path.dirname(image_paths[0])))
 			samples_img = [
 				np.reshape(
 					np.rint(127.5 * (self.clusters[s] + 1.0)), [self.n_px, self.n_px, 3]
@@ -92,6 +124,7 @@ class EmbeddingExtractor:
 			for img, ax in zip(samples_img, axes):
 				ax.axis('off')
 				ax.imshow(img)
+			plt.show()
 		# print("Shape of samples: ", samples.shape)
 		return samples
 
@@ -120,14 +153,14 @@ def load_tf_weights_in_image_gpt2(model, config, gpt2_checkpoint_path):
 		)
 		raise
 	tf_path = os.path.abspath(gpt2_checkpoint_path)
-	logger.info("Converting TensorFlow checkpoint from {}".format(tf_path))
+	logger.debug("Converting TensorFlow checkpoint from {}".format(tf_path))
 	# Load weights from TF model
 	init_vars = tf.train.list_variables(tf_path)
 	names = []
 	arrays = []
 
 	for name, shape in init_vars:
-		logger.info("Loading TF weight {} with shape {}".format(name, shape))
+		logger.debug("Loading TF weight {} with shape {}".format(name, shape))
 		array = tf.train.load_variable(tf_path, name)
 		names.append(name)
 		arrays.append(array.squeeze())
@@ -142,7 +175,7 @@ def load_tf_weights_in_image_gpt2(model, config, gpt2_checkpoint_path):
 			n in ["adam_v", "adam_m", "AdamWeightDecayOptimizer", "AdamWeightDecayOptimizer_1", "global_step"]
 			for n in name
 		) or name[-1] in ['_step']:
-			logger.info("Skipping {}".format("/".join(name)))
+			logger.debug("Skipping {}".format("/".join(name)))
 			continue
 		
 		pointer = model
@@ -189,7 +222,7 @@ def load_tf_weights_in_image_gpt2(model, config, gpt2_checkpoint_path):
 			  e.args += (pointer.shape, array.shape)
 			  raise
 		  
-		logger.info("Initialize PyTorch weight {}".format(name))
+		logger.debug("Initialize PyTorch weight {}".format(name))
 
 		if name[-1]=="q_proj":
 		  pointer.data[:,:config.n_embd] = torch.from_numpy(array.reshape(config.n_embd,config.n_embd) ).T
