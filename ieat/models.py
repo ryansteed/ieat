@@ -33,12 +33,13 @@ class EmbeddingExtractor:
 		self.from_cache = from_cache
 
 		color_clusters_file = "%s/kmeans_centers.npy"%(color_clusters_dir)
-		self.clusters = np.load(color_clusters_file) #get color clusters
+		self.clusters = np.load(color_clusters_file) # get color clusters
 		
-		n_embd, n_head, n_layer = EmbeddingExtractor.MODELS[model_size] #set model hyperparameters
+		n_embd, n_head, n_layer = EmbeddingExtractor.MODELS[model_size] # set model hyperparameters
 
-		self.vocab_size = len(self.clusters) + 1 #add one for start of sentence token
-		config = transformers.GPT2Config(
+		self.vocab_size = len(self.clusters) + 1 # add one for start of sentence token
+
+		self.config = transformers.GPT2Config(
 			vocab_size=self.vocab_size,
 			n_ctx=n_px*n_px,
 			n_positions=n_px*n_px,
@@ -46,10 +47,15 @@ class EmbeddingExtractor:
 			n_layer=n_layer,
 			n_head=n_head
 		)
-		model_path = "%s/%s/model.ckpt-1000000.index"%(models_dir, model_size)
-		self.model = ImageGPT2LMHeadModel.from_pretrained(model_path,from_tf=True,config=config)
+		self.model_path = "%s/%s/model.ckpt-1000000.index"%(models_dir, model_size)
+		self.model = None
+
+	def load_model(self):
+		assert os.path.exists(self.model_path), f"There is no file at {self.model_path}"
+		self.model = ImageGPT2LMHeadModel.from_pretrained(self.model_path,from_tf=True,config=self.config)
 
 	def extract(self, image_paths, output_path=None, gpu=False, **process_kwargs):
+		if self.model is None: self.load_model()
 		samples = self.process_samples(image_paths, **process_kwargs)
 		with torch.no_grad(): # saves some memory
 			# initialize with SOS token
