@@ -1,4 +1,4 @@
-from ieat.models import EmbeddingExtractor
+from ieat.models import SENTExtractor, OpenAIExtractor
 from weat.test import Test
 
 import logging
@@ -10,8 +10,8 @@ import pandas as pd
 
 
 def test(
-	X, Y, A, B, 
-	model_size, models_dir, clusters_dir, n_px,
+	X, Y, A, B, # content
+	model_type, model_size, models_dir, clusters_dir, n_px, # model details
 	file_types=[".jpg", ".jpeg", ".png", ".webp"],
 	from_cache=True,
 	verbose=True,
@@ -37,13 +37,27 @@ def test(
 
 	# get the embeddings
 	embeddings = []
-	extractor = EmbeddingExtractor(
-		model_size=model_size,
-		models_dir=models_dir,
-		color_clusters_dir=clusters_dir,
-		n_px=n_px,
-		from_cache=from_cache
-	)
+	models = {
+		"sent": SENTExtractor(
+			"sent",
+			model_size=model_size,
+			models_dir=models_dir,
+			color_clusters_dir=clusters_dir,
+			n_px=n_px,
+			from_cache=from_cache
+		),
+		"openai": OpenAIExtractor(
+			"openai",
+			model_size=model_size,
+			models_dir=models_dir,
+			color_clusters_dir=clusters_dir,
+			n_px=n_px,
+			from_cache=from_cache
+		)
+	}
+	extractor = models.get(model_type)
+	assert extractor is not None, f"Model type '{model_type}' not found."
+
 	for d in input_dirs:
 		embeddings.append(extractor.extract_dir(d, file_types, visualize=verbose))
 	assert len(embeddings) is not None, "Embeddings could not be extracted."

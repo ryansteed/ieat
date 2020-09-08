@@ -22,75 +22,15 @@ logger = logging.getLogger()
 
 
 class EmbeddingExtractor:
-	MODELS={"l":(1536,16,48),"m":(1024,8,36),"s":(512,8,24)} 
-
-	def __init__(self, model_size, models_dir, color_clusters_dir, n_px, from_cache=True):
-		"""
-		:param model_dir: path to a directory containing the model with the parameters specified
-		"""
-		self.n_px = n_px
-		self.model_size = model_size
-		self.from_cache = from_cache
-
-		color_clusters_file = "%s/kmeans_centers.npy"%(color_clusters_dir)
-		self.clusters = np.load(color_clusters_file) # get color clusters
-		
-		n_embd, n_head, n_layer = EmbeddingExtractor.MODELS[model_size] # set model hyperparameters
-
-		self.vocab_size = len(self.clusters) + 1 # add one for start of sentence token
-
-		self.config = transformers.GPT2Config(
-			vocab_size=self.vocab_size,
-			n_ctx=n_px*n_px,
-			n_positions=n_px*n_px,
-			n_embd=n_embd,
-			n_layer=n_layer,
-			n_head=n_head
-		)
-		self.model_path = "%s/%s/model.ckpt-1000000.index"%(models_dir, model_size)
+	def __init__(self, model_name):
+		self.model_name = model_name
 		self.model = None
 
 	def load_model(self):
-		assert os.path.exists(self.model_path), f"There is no file at {self.model_path}"
-		self.model = ImageGPT2LMHeadModel.from_pretrained(self.model_path,from_tf=True,config=self.config)
-
-	def extract(self, image_paths, output_path=None, gpu=False, **process_kwargs):
-		if self.model is None: self.load_model()
-		samples = self.process_samples(image_paths, **process_kwargs)
-		with torch.no_grad(): # saves some memory
-			# initialize with SOS token
-			context = np.concatenate( 
-				(
-					np.full( (len(image_paths), 1), self.vocab_size - 1 ),
-					samples.reshape(-1, self.n_px*self.n_px),
-				), axis=1
-			)
-			# DEBUG THIS LATER
-			# must drop the last pixel to make room for the SOS
-			context = torch.tensor(context[:,:-1]) if not gpu else torch.tensor(context[:,:-1]).cuda()
-			enc, _ = self.model(context)
-
-			enc_last = enc[:, -1, :].numpy() if not gpu else enc[:, -1, :].cpu().numpy()  # extract the rep of the last input, as in sent-bias
-
-			df = pd.DataFrame(enc_last)
-			df["img"] = [os.path.basename(path) for path in image_paths]
-
-			# DEPRECATED - NOW THAT CACHE IS STORED BY CATEGORY
-			# df["category"] = [os.path.basename(os.path.dirname(path)) for path in image_paths]
-			
-			if output_path is not None:
-				# add the image names to the CSV file
-				df.to_csv(output_path)
-
-			return df.set_index("img")
+		raise NotImplementedError
 
 	def extract_dir(self, d, file_types, visualize=False, **extract_params):
-		embedding_path = "embeddings/{}_{}_{}_{}.csv".format(
-			os.path.basename(os.path.dirname(d)), 
-			os.path.basename(d),
-			self.model_size,
-			self.n_px
-		)
+		embedding_path = self.make_embedding_path(d)
 		image_paths = [
 			os.path.join(d, f) for f in os.listdir(d)
 			if os.path.splitext(f)[1] in file_types
@@ -110,6 +50,75 @@ class EmbeddingExtractor:
 				**extract_params
 			)
 		return encs
+
+	def extract(self, image_paths, output_path=None, gpu=False, **process_kwargs):
+		if self.model is None: self.load_model()
+		samples = self.process_samples(image_paths, **process_kwargs)
+
+		with torch.no_grad(): # saves some memory
+
+			# model specific context extraction
+			encs = pd.DataFrame(self._extract_context(samples, gpu))
+
+			encs["img"] = [os.path.basename(path) for path in image_paths]
+
+			# DEPRECATED - NOW THAT CACHE IS STORED BY CATEGORY
+			# df["category"] = [os.path.basename(os.path.dirname(path)) for path in image_paths]
+			
+			if output_path is not None:
+				# add the image names to the CSV file
+				encs.to_csv(output_path)
+
+			return encs.set_index("img")
+
+	def process_samples(self, image_paths, visualize=False):
+		raise NotImplementedError
+
+	def _extract_context(self, samples, gpu):
+		raise NotImplementedError
+
+	def make_embedding_path(self, d):
+		return "embeddings/{}_{}_{}_{}.csv".format(
+			os.path.basename(os.path.dirname(d)), 
+			os.path.basename(d),
+			self.model_name,
+			self.make_param_path()
+		)
+
+	def make_param_path(self):
+		raise NotImplementedError
+
+
+class GPTExtractor(EmbeddingExtractor):
+	MODELS={"l":(1536,16,48),"m":(1024,8,36),"s":(512,8,24)}
+
+	def __init__(self, model_name, model_size, models_dir, color_clusters_dir, n_px, from_cache=True):
+		super().__init__(model_name)
+
+		self.n_px = n_px
+		self.model_size = model_size
+		self.from_cache = from_cache
+
+		color_clusters_file = "%s/kmeans_centers.npy"%(color_clusters_dir)
+		self.clusters = np.load(color_clusters_file) # get color clusters
+		
+		n_embd, n_head, n_layer = GPTExtractor.MODELS[model_size] # set model hyperparameters
+
+		self.vocab_size = len(self.clusters) + 1 # add one for start of sentence token
+
+		self.config = transformers.GPT2Config(
+			vocab_size=self.vocab_size,
+			n_ctx=n_px*n_px,
+			n_positions=n_px*n_px,
+			n_embd=n_embd,
+			n_layer=n_layer,
+			n_head=n_head
+		)
+		self.model_path = "%s/%s/model.ckpt-1000000.index"%(models_dir, model_size)
+
+	def load_model(self):
+		assert os.path.exists(self.model_path), f"There is no file at {self.model_path}"
+		self.model = ImageGPT2LMHeadModel.from_pretrained(self.model_path,from_tf=True,config=self.config)
 
 	def process_samples(self, image_paths, visualize=False):
 		for path in image_paths: assert os.path.exists(path), "ERR: %s is not a valid path." % path
@@ -133,6 +142,51 @@ class EmbeddingExtractor:
 			plt.show()
 		# print("Shape of samples: ", samples.shape)
 		return samples
+
+	def make_param_path(self):
+		return "{}_{}".format(
+			self.model_size,
+			self.n_px
+		)
+
+
+
+class SENTExtractor(GPTExtractor):
+	def _extract_context(self, samples, gpu):
+		# initialize with SOS token
+		context = np.concatenate( 
+			(
+				np.full( (samples.shape[0], 1), self.vocab_size - 1 ),
+				samples.reshape(-1, self.n_px*self.n_px),
+			), axis=1
+		)
+		
+		# must drop the last pixel to make room for the SOS
+		context = torch.tensor(context[:,:-1]) if not gpu else torch.tensor(context[:,:-1]).cuda()
+		enc, _ = self.model(context)
+
+		enc_last = enc[:, -1, :].numpy() if not gpu else enc[:, -1, :].cpu().numpy()  # extract the rep of the last input, as in sent-bias
+
+		return enc_last
+
+
+class OpenAIExtractor(GPTExtractor):
+	def _extract_context(self, samples, gpu):
+		# initialize with SOS token
+		context = np.concatenate( 
+			(
+				np.full( (samples.shape[0], 1), self.vocab_size - 1 ),
+				samples.reshape(-1, self.n_px*self.n_px),
+			), axis=1
+		)
+		
+		# must drop the last pixel to make room for the SOS
+		context = torch.tensor(context[:,:-1]) if not gpu else torch.tensor(context[:,:-1]).cuda()
+		enc, _ = self.model(context)
+
+		enc_last = enc[:, -1, :].numpy() if not gpu else enc[:, -1, :].cpu().numpy()  # extract the rep of the last input, as in sent-bias
+
+		return enc_last
 
 
 class ln_mod(nn.Module):
