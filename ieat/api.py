@@ -1,4 +1,4 @@
-from ieat.models import SENTExtractor, OpenAIExtractor
+from ieat.models import SENTExtractor, OpenAIExtractor, LogitExtractor
 from weat.test import Test
 
 import logging
@@ -38,8 +38,16 @@ def test(
 	# get the embeddings
 	embeddings = []
 	models = {
+		"logit": LogitExtractor(
+			model_type,
+			model_size=model_size,
+			models_dir=models_dir,
+			color_clusters_dir=clusters_dir,
+			n_px=n_px,
+			from_cache=from_cache
+		),
 		"sent": SENTExtractor(
-			"sent",
+			model_type,
 			model_size=model_size,
 			models_dir=models_dir,
 			color_clusters_dir=clusters_dir,
@@ -47,7 +55,7 @@ def test(
 			from_cache=from_cache
 		),
 		"openai": OpenAIExtractor(
-			"openai",
+			model_type,
 			model_size=model_size,
 			models_dir=models_dir,
 			color_clusters_dir=clusters_dir,

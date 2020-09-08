@@ -51,14 +51,14 @@ class EmbeddingExtractor:
 			)
 		return encs
 
-	def extract(self, image_paths, output_path=None, gpu=False, **process_kwargs):
+	def extract(self, image_paths, output_path=None, gpu=False, visualize=False, **extract_kwargs):
 		if self.model is None: self.load_model()
-		samples = self.process_samples(image_paths, **process_kwargs)
+		samples = self.process_samples(image_paths, visualize=visualize)
 
 		with torch.no_grad(): # saves some memory
 
 			# model specific context extraction
-			encs = pd.DataFrame(self._extract_context(samples, gpu))
+			encs = pd.DataFrame(self._extract_context(samples, gpu, **extract_kwargs))
 
 			encs["img"] = [os.path.basename(path) for path in image_paths]
 
@@ -74,7 +74,7 @@ class EmbeddingExtractor:
 	def process_samples(self, image_paths, visualize=False):
 		raise NotImplementedError
 
-	def _extract_context(self, samples, gpu):
+	def _extract_context(self, samples, gpu, **extract_kwargs):
 		raise NotImplementedError
 
 	def make_embedding_path(self, d):
@@ -108,8 +108,8 @@ class GPTExtractor(EmbeddingExtractor):
 
 		self.config = transformers.GPT2Config(
 			vocab_size=self.vocab_size,
-			n_ctx=n_px*n_px,
-			n_positions=n_px*n_px,
+			n_ctx=self.n_px*self.n_px,
+			n_positions=self.n_px*self.n_px,
 			n_embd=n_embd,
 			n_layer=n_layer,
 			n_head=n_head
@@ -118,7 +118,9 @@ class GPTExtractor(EmbeddingExtractor):
 
 	def load_model(self):
 		assert os.path.exists(self.model_path), f"There is no file at {self.model_path}"
-		self.model = ImageGPT2LMHeadModel.from_pretrained(self.model_path,from_tf=True,config=self.config)
+		self.model = ImageGPT2LMHeadModel.from_pretrained(
+			self.model_path, from_tf=True, config=self.config
+		)
 
 	def process_samples(self, image_paths, visualize=False):
 		for path in image_paths: assert os.path.exists(path), "ERR: %s is not a valid path." % path
@@ -149,11 +151,7 @@ class GPTExtractor(EmbeddingExtractor):
 			self.n_px
 		)
 
-
-
-class SENTExtractor(GPTExtractor):
-	def _extract_context(self, samples, gpu):
-		# initialize with SOS token
+	def model_output(self, samples, gpu):
 		context = np.concatenate( 
 			(
 				np.full( (samples.shape[0], 1), self.vocab_size - 1 ),
@@ -163,28 +161,40 @@ class SENTExtractor(GPTExtractor):
 		
 		# must drop the last pixel to make room for the SOS
 		context = torch.tensor(context[:,:-1]) if not gpu else torch.tensor(context[:,:-1]).cuda()
-		enc, _ = self.model(context)
+		return self.model(context, output_hidden_states=True, return_dict=True)
 
-		enc_last = enc[:, -1, :].numpy() if not gpu else enc[:, -1, :].cpu().numpy()  # extract the rep of the last input, as in sent-bias
+
+class LogitExtractor(GPTExtractor):
+	def _extract_context(self, samples, gpu, **extract_kwargs):
+		output = self.model_output(samples, gpu)
+		# just use the logit layer
+		enc_last = output.logits[:, -1, :].numpy() if not gpu else enc[:, -1, :].cpu().numpy()  # extract the rep of the last input, as in sent-bias
+
+		return enc_last
+
+
+class SENTExtractor(GPTExtractor):
+	def _extract_context(self, samples, gpu, **extract_kwargs):
+		"""
+		SENT uses the last hidden layer output.
+
+		For details, see https://github.com/tanyichern/social-biases-contextualized/blob/master/gpt2.py.
+		"""
+		# initialize with SOS token
+		output = self.model_output(samples, gpu)
+
+		enc_last = output.hidden_states[-1][:, -1, :].numpy() if not gpu else enc[:, -1, :].cpu().numpy()  # extract the rep of the last input
 
 		return enc_last
 
 
 class OpenAIExtractor(GPTExtractor):
-	def _extract_context(self, samples, gpu):
-		# initialize with SOS token
-		context = np.concatenate( 
-			(
-				np.full( (samples.shape[0], 1), self.vocab_size - 1 ),
-				samples.reshape(-1, self.n_px*self.n_px),
-			), axis=1
-		)
-		
-		# must drop the last pixel to make room for the SOS
-		context = torch.tensor(context[:,:-1]) if not gpu else torch.tensor(context[:,:-1]).cuda()
-		enc, _ = self.model(context)
+	def _extract_context(self, samples, gpu, **extract_kwargs):
+		l = extract_kwargs.get("l", 20)
 
-		enc_last = enc[:, -1, :].numpy() if not gpu else enc[:, -1, :].cpu().numpy()  # extract the rep of the last input, as in sent-bias
+		output = self.model_output(samples, gpu)
+
+		enc_last = output.hidden_states[l][:, -1, :].numpy() if not gpu else enc[:, -1, :].cpu().numpy()  # extract the rep of the lth input
 
 		return enc_last
 
