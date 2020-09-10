@@ -5,3 +5,4 @@ clusters/*
 ieat/__pycache__
 data/cifar*
 *.DS_Store
+.idea
