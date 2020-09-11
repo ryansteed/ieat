@@ -178,7 +178,7 @@ class LogitExtractor(GPTExtractor):
 		output = self.model_output(samples, gpu)
 		# just use the logit layer
 		# extract the rep of the last input, as in sent-bias
-		enc_last = output.logits[:, -1, :].numpy()
+		enc_last = output.logits[:, -1, :]
 
 		return enc_last.numpy() if not gpu else enc_last.cpu().numpy()
 
