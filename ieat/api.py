@@ -4,6 +4,7 @@ from weat.test import Test
 import logging
 
 import os
+import glob
 from collections import namedtuple
 import pandas as pd
 
@@ -82,7 +83,8 @@ def test_all(
 			'Insect-Flower', 'insect-flower/flower', 'insect-flower/insect', 'valence/pleasant', 'valence/unpleasant'
 		),
 		# Picture-Picture IATS
-		TestData('Weapon', 'weapon/black', 'weapon/white', 'weapon/tool', 'weapon/weapon'),
+		TestData('Weapon', 'weapon/white', 'weapon/black', 'weapon/tool', 'weapon/weapon'),
+		TestData('Weapon (Modern)', 'weapon/white', 'weapon/black', 'weapon/tool-modern', 'weapon/weapon-modern'),
 		TestData('Native', 'native/euro', 'native/native', 'native/us', 'native/world'),
 		TestData('Asian', 'asian/european-american', 'asian/asian-american', 'asian/american', 'asian/foreign'),
 		# Valence IATs
@@ -107,7 +109,7 @@ def test_all(
 		),
 		TestData('Religion', 'religion/christianity', 'religion/judaism', 'valence/pleasant', 'valence/unpleasant'),
 		TestData('Sexuality', 'sexuality/gay', 'sexuality/straight', 'valence/pleasant', 'valence/unpleasant'),
-		TestData('Race', 'race/african-american', 'race/european-american', 'valence/pleasant', 'valence/unpleasant'),
+		TestData('Race', 'race/european-american', 'race/african-american', 'valence/pleasant', 'valence/unpleasant'),
 		TestData(
 			'Arab-Muslim',
 			'arab-muslim/other-people', 'arab-muslim/arab-muslim', 'valence/pleasant', 'valence/unpleasant'
@@ -137,7 +139,9 @@ def test_all(
 				n_px=n_px,
 				**test_params
 			)
-			results[(test_data.name, model_type)] = (*categories, effect, p)
+			# pull the sample sizes for X and A
+			n_target, n_attr = (len(glob.glob1(categories[c], "*")) for c in [0, 2])
+			results[(test_data.name, model_type)] = (*categories, effect, p, n_target, n_attr)
 
 	return results
 
