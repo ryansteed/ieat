@@ -124,7 +124,6 @@ def test_all(
 	to_test = tests_all if tests is None else (t for t in tests_all if t.name in tests)
 	for test_data in to_test:
 		logger.progress(f"Running {test_data.name}")
-		results[test_data.name] = {}
 		for model_type in model_types:
 			categories = [
 				os.path.join('data/experiments', cat) for cat in (test_data.X, test_data.Y, test_data.A, test_data.B)
@@ -138,7 +137,7 @@ def test_all(
 				n_px=n_px,
 				**test_params
 			)
-			results[test_data.name][model_type] = (effect, p)
+			results[(test_data.name, model_type)] = (*categories, effect, p)
 
 	return results
 
