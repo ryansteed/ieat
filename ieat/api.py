@@ -23,6 +23,7 @@ def test(
 	file_types=(".jpg", ".jpeg", ".png", ".webp"),
 	from_cache=True,
 	verbose=False,
+	batch=5,
 	**test_params
 ):
 	"""
@@ -125,7 +126,8 @@ def test_all(
 	results = {}
 	to_test = tests_all if tests is None else (t for t in tests_all if t.name in tests)
 	for test_data in to_test:
-		logger.progress(f"Running {test_data.name}")
+		# logger.progress(f"Running {test_data.name}")
+		print(f"Running {test_data.name}")
 		for model_type in model_types:
 			categories = [
 				os.path.join('data/experiments', cat) for cat in (test_data.X, test_data.Y, test_data.A, test_data.B)

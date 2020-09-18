@@ -32,7 +32,7 @@ class EmbeddingExtractor:
 	def load_model(self):
 		raise NotImplementedError
 
-	def extract_dir(self, d, file_types, visualize=False, **extract_params):
+	def extract_dir(self, d, file_types, batch_size=5, visualize=False, **extract_params):
 		embedding_path = self.make_embedding_path(d)
 		image_paths = [
 			os.path.join(d, f) for f in os.listdir(d)
@@ -45,13 +45,17 @@ class EmbeddingExtractor:
 				self.process_samples(image_paths, visualize=True)
 		else:
 			logger.info("Extracting embeddings for %s" % os.path.basename(d))
-			# suppress annoying logger output
-			encs = self.extract(
-				image_paths,
-				output_path=embedding_path,
-				visualize=visualize,
-				**extract_params
-			)
+			
+			# do extraction in batches to save memory
+			batches = [image_paths[i:i+batch_size] for i in range(0, len(image_paths), batch_size)]
+			encs = pd.concat([
+				self.extract(
+					batch,
+					output_path=embedding_path,
+					visualize=visualize,
+					**extract_params
+				) for batch in batches
+			])
 		return encs
 
 	def extract(self, image_paths, output_path=None, gpu=False, visualize=False, **extract_kwargs):
