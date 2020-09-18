@@ -23,7 +23,8 @@ def test(
 	file_types=(".jpg", ".jpeg", ".png", ".webp"),
 	from_cache=True,
 	verbose=False,
-	batch=5,
+	gpu=False,
+	batch_size=5,
 	**test_params
 ):
 	"""
@@ -50,7 +51,12 @@ def test(
 	assert extractor is not None, f"Model type '{model_type}' not found."
 
 	for d in input_dirs:
-		embeddings.append(extractor.extract_dir(d, file_types, visualize=verbose))
+		embeddings.append(extractor.extract_dir(
+			d, file_types, 
+			visualize=verbose, 
+			gpu=False, 
+			batch_size=batch_size)
+		)
 	assert len(embeddings) is not None, "Embeddings could not be extracted."
 	assert len(embeddings) == len(input_dirs), "Not all embeddings could not be extracted."
 
