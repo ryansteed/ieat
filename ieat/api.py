@@ -186,16 +186,16 @@ def _load_model(model_type, model_size, models_dir, clusters_dir, n_px, from_cac
 
 if __name__ == "__main__":
 	# some default settings
-	model_size = "s"
+	model_size = "l"
 	models_dir = "models"
 	color_clusters_dir = "clusters"
 	n_px = 32
 
 	print(test_all(
-		model_types=["logit", "openai"],
-		model_size=model_size,
-		models_dir=models_dir,
-		clusters_dir=color_clusters_dir,
-		n_px=n_px,
-		tests=["Weapon", "Race"]
+	    model_types=["logit", "sent", "openai"],
+	    model_size=model_size,
+	    models_dir=models_dir,
+	    clusters_dir=color_clusters_dir,
+	    gpu=True,
+	    n_px=n_px
 	))
