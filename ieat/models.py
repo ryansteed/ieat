@@ -32,7 +32,7 @@ class EmbeddingExtractor:
 	def load_model(self):
 		raise NotImplementedError
 
-	def extract_dir(self, d, file_types, batch_size=5, visualize=False, **extract_params):
+	def extract_dir(self, d, file_types, batch_size=None, visualize=False, **extract_params):
 		embedding_path = self.make_embedding_path(d)
 		image_paths = [
 			os.path.join(d, f) for f in os.listdir(d)
@@ -47,26 +47,29 @@ class EmbeddingExtractor:
 			logger.info("Extracting embeddings for %s" % os.path.basename(d))
 			
 			# do extraction in batches to save memory
-			batches = [image_paths[i:i+batch_size] for i in range(0, len(image_paths), batch_size)]
-			encs = pd.concat([
-				self.extract(
-					batch,
-					output_path=embedding_path,
-					visualize=visualize,
-					**extract_params
-				) for batch in batches
-			])
+			
+			encs = image_paths.extract(
+				batch_size=batch_size,
+				output_path=embedding_path,
+				visualize=visualize,
+				**extract_params
+			)
 		return encs
 
-	def extract(self, image_paths, output_path=None, gpu=False, visualize=False, **extract_kwargs):
+	def extract(self, image_paths, batch_size=None, output_path=None, gpu=False, visualize=False, **extract_kwargs):
 		if self.model is None:
 			self.load_model()
-		samples = self.process_samples(image_paths, visualize=visualize)
+		if batch_size is None:
+			batch_size = len(image_paths)
 
 		with torch.no_grad():  # saves some memory
+			batches = [image_paths[i:i+batch_size] for i in range(0, len(image_paths), batch_size)]
 
 			# model specific context extraction
-			encs = pd.DataFrame(self._extract_context(samples, gpu, **extract_kwargs))
+			encs = pd.concat([
+				self._extract_context(self.process_samples(batch, visualize=visualize), gpu, **extract_kwargs)
+				for batch in batches
+			])
 
 			encs["img"] = [os.path.basename(path) for path in image_paths]
 

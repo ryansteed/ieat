@@ -24,7 +24,7 @@ def test(
 	from_cache=True,
 	verbose=False,
 	gpu=False,
-	batch_size=5,
+	batch_size=20,
 	**test_params
 ):
 	"""
