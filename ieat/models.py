@@ -68,7 +68,9 @@ class EmbeddingExtractor:
 
 			# model specific context extraction
 			encs = pd.concat([
-				self._extract_context(self.process_samples(batch, visualize=visualize), gpu, **extract_kwargs)
+				pd.DataFrame(
+					self._extract_context(self.process_samples(batch, visualize=visualize), gpu, **extract_kwargs)
+				)
 				for batch in batches
 			])
 
