@@ -192,7 +192,7 @@ if __name__ == "__main__":
 	n_px = 32
 
 	print(test_all(
-	    model_types=["logit", "sent", "openai"],
+	    model_types=["logit", "openai"],
 	    model_size=model_size,
 	    models_dir=models_dir,
 	    clusters_dir=color_clusters_dir,
