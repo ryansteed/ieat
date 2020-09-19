@@ -48,7 +48,8 @@ class EmbeddingExtractor:
 			
 			# do extraction in batches to save memory
 			
-			encs = image_paths.extract(
+			encs = self.extract(
+				image_paths,
 				batch_size=batch_size,
 				output_path=embedding_path,
 				visualize=visualize,
