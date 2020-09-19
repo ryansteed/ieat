@@ -134,8 +134,9 @@ def test_all(
 	to_test = tests_all if tests is None else (t for t in tests_all if t.name in tests)
 	for test_data in to_test:
 		# logger.progress(f"Running {test_data.name}")
-		print(f"Running {test_data.name}")
+		print(f"## {test_data.name} ##")
 		for model_type in model_types:
+			print(f"# {model_type} #")
 			categories = [
 				os.path.join('data/experiments', cat) for cat in (test_data.X, test_data.Y, test_data.A, test_data.B)
 			]
