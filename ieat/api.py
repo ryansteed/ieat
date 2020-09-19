@@ -51,12 +51,13 @@ def test(
 	assert extractor is not None, f"Model type '{model_type}' not found."
 
 	for d in input_dirs:
+		logger.progress(f"Extracting images from {d}")
 		embeddings.append(extractor.extract_dir(
 			d, file_types, 
 			visualize=verbose, 
-			gpu=False, 
-			batch_size=batch_size)
-		)
+			gpu=gpu,
+			batch_size=batch_size
+		))
 	assert len(embeddings) is not None, "Embeddings could not be extracted."
 	assert len(embeddings) == len(input_dirs), "Not all embeddings could not be extracted."
 
