@@ -1,0 +1,116 @@
+﻿IAT,Category,Word,Source,Collected (N=n),Other Search Terms,n
+Native,All,N/A,Project Implicit,Yes,,
+Asian,All,N/A,Project Implicit,Yes,,
+Weapon,All,N/A,Project Implicit,Yes,,
+Weight,Fat/Thin,N/A,Project Implicit,Yes,,
+Religion,Judaism,Synagogue,Google Image Search,Yes,,2
+Religion,Judaism,Torah,Google Image Search,Yes,,1
+Religion,Judaism,Jew,Google Image Search,Yes,,3
+Religion,Judaism,Judaism,Google Image Search,Yes,,1
+Religion,Christianity,Church,Google Image Search,Yes,,2
+Religion,Christianity,Bible,Google Image Search,Yes,,1
+Religion,Christianity,Christian,Google Image Search,Yes,,3
+Religion,Christianity,Christianity,Google Image Search,Yes,,1
+"Gender-Career, Gender-Science",Male,Son,Google Image Search,Yes,"added ""white background""",0
+"Gender-Career, Gender-Science",Male,Man,Google Image Search,Yes,"added ""white background""",10
+"Gender-Career, Gender-Science",Male,Father,Google Image Search,Yes,"added ""white background""",0
+"Gender-Career, Gender-Science",Male,Boy,Google Image Search,Yes,"added ""white background""",10
+"Gender-Career, Gender-Science",Male,Uncle,Google Image Search,Yes,"added ""white background""",0
+"Gender-Career, Gender-Science",Male,Grandpa,Google Image Search,Yes,"added ""white background"", old man",10
+"Gender-Career, Gender-Science",Male,Husband,Google Image Search,Yes,"added ""white background""",0
+"Gender-Career, Gender-Science",Male,Male,Google Image Search,Yes,"added ""white background""",10
+Gender-Science,Science,Astronomy,Google Image Search,Yes,astronomy lab,3
+Gender-Science,Science,Math,Google Image Search,Yes,"math classroom - for all of these, no people",3
+Gender-Science,Science,Chemistry,Google Image Search,Yes,chemistry lab,3
+Gender-Science,Science,Physics,Google Image Search,Yes,physics lab,3
+Gender-Science,Science,Biology,Google Image Search,Yes,biology lab,3
+Gender-Science,Science,Geology,Google Image Search,Yes,geology site,3
+Gender-Science,Science,Engineering,Google Image Search,Yes,"engineering, engineering lab",3
+Gender-Science,Liberal Arts,History,Google Image Search,Yes,history museum,3
+Gender-Science,Liberal Arts,Arts,Google Image Search,Yes,"arts room, art studio",3
+Gender-Science,Liberal Arts,Humanities,Google Image Search,Yes,humanities room,3
+Gender-Science,Liberal Arts,English,Google Image Search,Yes,writing room,3
+Gender-Science,Liberal Arts,Philosophy,Google Image Search,Yes,,0
+Gender-Science,Liberal Arts,Music,Google Image Search,Yes,music room,6
+Gender-Science,Liberal Arts,Literature,Google Image Search,Yes,"literature, library",6
+"Gender-Career, Gender-Science",Female,Mother,Google Image Search,Yes,"added ""white background""",0
+"Gender-Career, Gender-Science",Female,Wife,Google Image Search,Yes,"added ""white background""",0
+"Gender-Career, Gender-Science",Female,Aunt,Google Image Search,Yes,"added ""white background""",0
+"Gender-Career, Gender-Science",Female,Woman,Google Image Search,Yes,"added ""white background""",10
+"Gender-Career, Gender-Science",Female,Girl,Google Image Search,Yes,"added ""white background"", little girl",10
+"Gender-Career, Gender-Science",Female,Female,Google Image Search,Yes,"added ""white background""",10
+"Gender-Career, Gender-Science",Female,Grandma,Google Image Search,Yes,"added ""white background"", old woman",10
+"Gender-Career, Gender-Science",Female,Daughter,Google Image Search,Yes,"added ""white background""",0
+Valence,Pleasant,Ocean,CIFAR-100,Yes,,5
+Valence,Pleasant,Beach,CIFAR-100,Yes,,5
+Valence,Pleasant,Sunrise,Google Image Search,Yes,,5
+Valence,Pleasant,Diamond,Google Image Search,Yes,,5
+Valence,Pleasant,Rainbow,Google Image Search,Yes,,5
+Valence,Pleasant,Money,Google Image Search,Yes,,5
+Valence,Pleasant,Sunset,Google Image Search,Yes,,5
+Valence,Pleasant,Flower,Google Image Search,Yes,,5
+Valence,Pleasant,Baby,CIFAR-100,Yes,,5
+Valence,Pleasant,Gold,Google Image Search,Yes,,5
+Valence,Pleasant,Butterfly,Google Image Search,Yes,,5
+Valence,Unpleasant,Crash,Google Image Search,Yes,,5
+Valence,Unpleasant,Prison,Google Image Search,Yes,,5
+Valence,Unpleasant,Vomit,Google Image Search,Yes,,5
+Valence,Unpleasant,Funeral,Google Image Search,Yes,,5
+Valence,Unpleasant,Jail,Google Image Search,Yes,,5
+Valence,Unpleasant,Roach,Google Image Search,Yes,,5
+Valence,Unpleasant,Coffin,Google Image Search,Yes,,5
+Valence,Unpleasant,Corpse,Google Image Search,Yes,,5
+Valence,Unpleasant,Morgue,Google Image Search,Yes,,5
+Valence,Unpleasant,Slum,Google Image Search,Yes,,5
+Valence,Unpleasant,Devil,Google Image Search,Yes,,5
+Gender-Career,Career,Office,Google Image Search,Yes,,7
+Gender-Career,Career,Career,Google Image Search,Yes,,0
+Gender-Career,Career,Corporation,Google Image Search,Yes,"corporation building, corporation office",5
+Gender-Career,Career,Salary,Google Image Search,Yes,,1
+Gender-Career,Career,Professional,Google Image Search,Yes,"professional, professional room",1
+Gender-Career,Career,Management,Google Image Search,Yes,management room,3
+Gender-Career,Career,Business,Google Image Search,Yes,business room,3
+Gender-Career,Family,Wedding,Google Image Search,Yes,,3
+Gender-Career,Family,Marriage,Google Image Search,Yes,,3
+Gender-Career,Family,Parents,Google Image Search,Yes,,3
+Gender-Career,Family,Relatives,Google Image Search,Yes,,3
+Gender-Career,Family,Family,Google Image Search,Yes,,3
+Gender-Career,Family,Home,Google Image Search,Yes,,3
+Gender-Career,Family,Children,Google Image Search,Yes,"Here, must have people in the picture - so ensure there is a gender balance.",3
+Skin-Tone,Light/Dark,N/A,Project Implicit,Yes,,
+Disability,Disabled,Disabled,Google Image Search,Yes,"disabled, disabled people",10
+Presidents,Trump/Other,N/A,Project Implicit,Yes,,
+Race,African/European American,N/A,Project Implicit,Yes,,
+Age,Old/Young,N/A,Project Implicit,Yes,,
+Sexuality,Gay,Gay people,Google Image Search,Yes,,3
+Sexuality,Gay,Homosexual,Google Image Search,Yes,,3
+Sexuality,Gay,Gay,Google Image Search,Yes,,3
+Sexuality,Gay,Gay men,Google Image Search,Yes,,3
+Sexuality,Straight,Straight,Google Image Search,Yes,straight couple,3
+Sexuality,Straight,Straight people,Google Image Search,Yes,,3
+Sexuality,Straight,Heterosexual,Google Image Search,Yes,,3
+Insect-Flower,Insect,Wasp,Google Image Search,Yes,,5
+Insect-Flower,Insect,Flea,Google Image Search,Yes,,5
+Insect-Flower,Insect,Roach,Google Image Search,Yes,,5
+Insect-Flower,Insect,Centipede,Google Image Search,Yes,,5
+Insect-Flower,Insect,Moth,Google Image Search,Yes,,5
+Insect-Flower,Insect,Bedbug,Google Image Search,Yes,,5
+Insect-Flower,Insect,Gnat,Google Image Search,Yes,,5
+Insect-Flower,Flower,Orchid,Google Image Search,Yes,,5
+Insect-Flower,Flower,Tulip,Google Image Search,Yes,,5
+Insect-Flower,Flower,Rose,Google Image Search,Yes,,5
+Insect-Flower,Flower,Daffodil,Google Image Search,Yes,,5
+Insect-Flower,Flower,Daisy,Google Image Search,Yes,,5
+Insect-Flower,Flower,Lilac,Google Image Search,Yes,,5
+Insect-Flower,Flower,Lily,Google Image Search,Yes,,5
+Arab-Muslim,Arab Muslims,Arab mu,Google Image Search,Yes,arab-muslim person,10
+"Arab-Muslim, Disability",Other People,Other people,Google Image Search,Yes,"african american, caucasian + white background",10
+Weapon-Modern,Weapon-Modern,Weapon,Google Image Search,Yes,"axe, grenade, machete",9
+Weapon-Modern,White,N/A,Project Implicit,Yes,,
+Weapon-Modern,Tool-Modern,Tool,Google Image Search,Yes,"bottle, camera, coke, ice cream, phone, wallet, phone with headphones, watch, book",9
+Weapon-Modern,Black,N/A,Project Implicit,Yes,,
+Disability,Disabled/Abled,N/A,Project Implicit,Yes,,
+Race,African American,African American,Google Image Search,No,From Aylin's appearance bias data,
+Race,European American,European American,Google Image Search,No,From Aylin's appearance bias data,
+Skin-Tone,Light,Light,,No,,
+Skin-Tone,Dark,Dark,,No,,
