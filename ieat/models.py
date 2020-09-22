@@ -9,10 +9,13 @@ import torch
 import torch.nn as nn
 from torch.nn.parameter import Parameter
 import tensorflow as tf
+import tensorflow_hub as hub
 
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from tqdm import tqdm
+import cv2
 
 import logging
 
@@ -88,7 +91,7 @@ class EmbeddingExtractor:
 	def process_samples(self, image_paths, visualize=False):
 		raise NotImplementedError
 
-	def _extract_context(self, samples, gpu, **extract_kwargs):
+	def _extract_context(self, samples, gpu, **extract_kwargs) -> np.ndarray:
 		raise NotImplementedError
 
 	def make_embedding_path(self, d):
@@ -101,6 +104,57 @@ class EmbeddingExtractor:
 
 	def make_param_path(self):
 		raise NotImplementedError
+
+
+class SimCLRExtractor(EmbeddingExtractor):
+	n_px = 224
+
+	def __init__(self, model_name: str, depth: int, width: int, sk: int, from_cache=True):
+		super().__init__(model_name, from_cache)
+		tf.compat.v1.disable_eager_execution()
+		self.depth = depth
+		self.width = width
+		self.sk = sk
+		self.sess = None
+		self.images = None
+
+	def load_model(self):
+		hub_path = f"gs://simclr-checkpoints/simclrv2/pretrained/r{self.depth}_{self.width}x_sk{self.sk}/hub"
+		module = hub.Module(hub_path, trainable=False)
+		self.images = tf.compat.v1.placeholder(tf.float32)
+		self.model = module(inputs=self.images, signature="default", as_dict=True)
+		self.sess = tf.compat.v1.Session()
+		self.sess.run(tf.compat.v1.global_variables_initializer())
+
+	def process_samples(self, image_paths: list, visualize=False):
+		images = []
+
+		for image in tqdm(image_paths):
+			image_pixels = plt.imread(image)
+			image_pixels = cv2.resize(image_pixels, (SimCLRExtractor.n_px, SimCLRExtractor.n_px))
+			image_pixels = image_pixels / 255.
+
+			images.append(image_pixels)
+
+		images = np.array(images)
+
+		if visualize:
+			print(os.path.basename(os.path.dirname(image_paths[0])))
+			f, axes = plt.subplots(1, len(image_paths), dpi=300)
+			for img, ax in zip(images, axes):
+				ax.axis('off')
+				ax.imshow(img)
+			plt.show()
+
+		return images
+
+	def _extract_context(self, samples, gpu, **extract_kwargs) -> np.ndarray:
+		output = self.sess.run(self.model, {self.images: samples})
+		encs = output['default']
+		return encs
+
+	def make_param_path(self):
+		return f"{self.depth}_{self.width}x_sk{self.sk}"
 
 
 class GPTExtractor(EmbeddingExtractor):
@@ -130,7 +184,7 @@ class GPTExtractor(EmbeddingExtractor):
 		)
 		self.model_path = "%s/%s/model.ckpt-1000000.index" % (models_dir, model_size)
 
-	def _extract_context(self, samples, gpu, **extract_kwargs):
+	def _extract_context(self, samples, gpu, **extract_kwargs) -> np.ndarray:
 		raise NotImplementedError
 
 	def load_model(self):
@@ -184,7 +238,7 @@ class GPTExtractor(EmbeddingExtractor):
 
 
 class LogitExtractor(GPTExtractor):
-	def _extract_context(self, samples, gpu, **extract_kwargs):
+	def _extract_context(self, samples, gpu, **extract_kwargs) -> np.ndarray:
 		output = self.model_output(samples, gpu)
 		# just use the logit layer
 		# extract the rep of the last input, as in sent-bias
@@ -194,7 +248,7 @@ class LogitExtractor(GPTExtractor):
 
 
 class SENTExtractor(GPTExtractor):
-	def _extract_context(self, samples, gpu, **extract_kwargs):
+	def _extract_context(self, samples, gpu, **extract_kwargs)  -> np.ndarray:
 		"""
 		SENT uses the last hidden layer output.
 
@@ -215,7 +269,7 @@ class OpenAIExtractor(GPTExtractor):
 	2. average pool across the sequence dimension:
 	$$ f^l = \langle n^l_i \rangle_i $$
 	"""
-	def _extract_context(self, samples, gpu, **extract_kwargs):
+	def _extract_context(self, samples, gpu, **extract_kwargs) -> np.ndarray:
 		l = extract_kwargs.get("l", 20)
 
 		output = self.model_output(samples, gpu)

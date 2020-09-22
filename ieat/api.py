@@ -1,4 +1,4 @@
-from ieat.models import SENTExtractor, OpenAIExtractor, LogitExtractor
+from ieat.models import SENTExtractor, OpenAIExtractor, LogitExtractor, SimCLRExtractor
 from weat.test import Test
 
 import logging
@@ -6,7 +6,6 @@ import logging
 import os
 import glob
 from collections import namedtuple
-import pandas as pd
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -18,8 +17,9 @@ logging.Logger.progress = progress
 
 
 def test(
-	X, Y, A, B, # content
-	model_type, model_size, models_dir, clusters_dir, n_px, # model details
+	X, Y, A, B,  # content
+	model_type: str,
+	model_params: list,  # model parameters
 	file_types=(".jpg", ".jpeg", ".png", ".webp"),
 	from_cache=True,
 	verbose=False,
@@ -32,10 +32,8 @@ def test(
 	:param Y: a directory of target images
 	:param A: a directory of attribute images
 	:param B: a directory of attribute images
-	:param model_size: iGPT model size - e.g. 's', 'm', or 'l'
-	:param models_dir: directory of iGPT model checkpoints
-	:param clusters_dir: directory of iGPT color cluster files
-	:param n_px: number of pixels in the input images
+	:param model_type: key name of model
+	:param model_params: Model-specific initialization parameters
 	:param file_types: acceptable image file types
 	:param from_cache: whether to use cached embeddings at the location `embedding_path`
 	:param verbose: whether to print out images, other detailed logging info
@@ -47,7 +45,7 @@ def test(
 
 	# get the embeddings
 	embeddings = []
-	extractor = _load_model(model_type, model_size, models_dir, clusters_dir, n_px, from_cache)
+	extractor = _load_model(model_type, *model_params, from_cache=from_cache)
 	assert extractor is not None, f"Model type '{model_type}' not found."
 
 	for d in input_dirs:
@@ -68,15 +66,13 @@ def test(
 
 
 def test_all(
-		model_types, model_size, models_dir, clusters_dir, n_px,  # model details
-		tests=None,
+		model_types: dict,
+		tests: list = None,
 		**test_params
 	):
 	"""
 	Produce a table of model_type x test results.
-	:param model_types: List of models to test.
-	:param model_size: iGPT model size - e.g. 's', 'm', or 'l'
-	:param models_dir: directory of iGPT model checkpoints
+	:param model_types: mapping of model type keyword to parameters for that model
 	:param clusters_dir: directory of iGPT color cluster files
 	:param n_px: number of pixels in the input images
 	:param test_params: Extra params for the `test` method
@@ -135,18 +131,15 @@ def test_all(
 	for test_data in to_test:
 		# logger.progress(f"Running {test_data.name}")
 		print(f"## {test_data.name} ##")
-		for model_type in model_types:
+		for model_type, model_params in model_types.items():
 			print(f"# {model_type} #")
 			categories = [
 				os.path.join('data/experiments', cat) for cat in (test_data.X, test_data.Y, test_data.A, test_data.B)
 			]
 			effect, p = test(
 				*categories,
-				model_type=model_type,
-				model_size=model_size,
-				models_dir=models_dir,
-				clusters_dir=clusters_dir,
-				n_px=n_px,
+				model_type,
+				model_params,
 				**test_params
 			)
 			# pull the sample sizes for X and A
@@ -156,34 +149,32 @@ def test_all(
 	return results
 
 
-def _load_model(model_type, model_size, models_dir, clusters_dir, n_px, from_cache):
-	models = {
-		"logit": LogitExtractor(
+def _load_model(model_type, *model_params, **model_kwargs):
+	if model_type == "logit":
+		return LogitExtractor(
 			model_type,
-			model_size=model_size,
-			models_dir=models_dir,
-			color_clusters_dir=clusters_dir,
-			n_px=n_px,
-			from_cache=from_cache
-		),
-		"sent": SENTExtractor(
-			model_type,
-			model_size=model_size,
-			models_dir=models_dir,
-			color_clusters_dir=clusters_dir,
-			n_px=n_px,
-			from_cache=from_cache
-		),
-		"openai": OpenAIExtractor(
-			model_type,
-			model_size=model_size,
-			models_dir=models_dir,
-			color_clusters_dir=clusters_dir,
-			n_px=n_px,
-			from_cache=from_cache
+			*model_params,
+			**model_kwargs
 		)
-	}
-	return models.get(model_type)
+	elif model_type == "sent":
+		return SENTExtractor(
+			model_type,
+			*model_params,
+			**model_kwargs
+		)
+	elif model_type == "openai":
+		return OpenAIExtractor(
+			model_type,
+			*model_params,
+			**model_kwargs
+		)
+	elif model_type == "simclr":
+		return SimCLRExtractor(
+			model_type,
+			*model_params,
+			**model_kwargs
+		)
+	raise ValueError(f"Invalid model type {model_type}.")
 
 
 if __name__ == "__main__":
@@ -192,12 +183,30 @@ if __name__ == "__main__":
 	models_dir = "models"
 	color_clusters_dir = "clusters"
 	n_px = 32
+	depth = 50
+	width = 1
+	sk = 0
 
 	print(test_all(
-	    model_types=["logit", "openai"],
-	    model_size=model_size,
-	    models_dir=models_dir,
-	    clusters_dir=color_clusters_dir,
-	    gpu=True,
-	    n_px=n_px
+		model_types={
+			# "logit": (
+			# 	model_size,
+			# 	models_dir,
+			# 	color_clusters_dir,
+			# 	n_px
+			# ),
+			# "openai": (
+			# 	model_size,
+			# 	models_dir,
+			# 	color_clusters_dir,
+			# 	n_px
+			# ),
+			"simclr": (
+				depth,
+				width,
+				sk
+			)
+		},
+		gpu=True,
+		from_cache=True
 	))
