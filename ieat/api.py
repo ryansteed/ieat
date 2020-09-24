@@ -25,6 +25,7 @@ def test(
 	verbose=False,
 	gpu=False,
 	batch_size=20,
+	model=None,
 	**test_params
 ):
 	"""
@@ -45,7 +46,9 @@ def test(
 
 	# get the embeddings
 	embeddings = []
-	extractor = _load_model(model_type, *model_params, from_cache=from_cache)
+	extractor = model if model is not None else _load_model(
+		model_type, *model_params, from_cache=from_cache
+	)
 	assert extractor is not None, f"Model type '{model_type}' not found."
 
 	for d in input_dirs:
@@ -68,6 +71,7 @@ def test(
 def test_all(
 		model_types: dict,
 		tests: list = None,
+		from_cache=True,
 		**test_params
 	):
 	"""
@@ -128,11 +132,13 @@ def test_all(
 
 	results = {}
 	to_test = tests_all if tests is None else (t for t in tests_all if t.name in tests)
-	for test_data in to_test:
-		# logger.progress(f"Running {test_data.name}")
-		print(f"## {test_data.name} ##")
-		for model_type, model_params in model_types.items():
-			print(f"# {model_type} #")
+	for model_type, model_params in model_types.items():
+		print(f"# {model_type} #")
+		extractor = _load_model(
+			model_type, *model_params, from_cache=from_cache
+		)
+		for test_data in to_test:
+			print(f"## {test_data.name} ##")
 			categories = [
 				os.path.join('data/experiments', cat) for cat in (test_data.X, test_data.Y, test_data.A, test_data.B)
 			]
@@ -140,6 +146,7 @@ def test_all(
 				*categories,
 				model_type,
 				model_params,
+				model=extractor,
 				**test_params
 			)
 			# pull the sample sizes for X and A
