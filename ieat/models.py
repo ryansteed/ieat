@@ -14,8 +14,6 @@ import tensorflow_hub as hub
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from tqdm import tqdm
-import cv2
 
 import logging
 
@@ -105,6 +103,16 @@ class EmbeddingExtractor:
 	def make_param_path(self):
 		raise NotImplementedError
 
+	@staticmethod
+	def visualize(images, paths):
+		print(os.path.basename(os.path.dirname(paths[0])))
+		f, axes = plt.subplots(1, len(image_paths), dpi=300)
+		for img, ax in zip(images, axes):
+			ax.axis('off')
+			ax.imshow(img)
+		plt.show()
+
+
 
 class SimCLRExtractor(EmbeddingExtractor):
 	n_px = 224
@@ -127,24 +135,10 @@ class SimCLRExtractor(EmbeddingExtractor):
 		self.sess.run(tf.compat.v1.global_variables_initializer())
 
 	def process_samples(self, image_paths: list, visualize=False):
-		images = []
-
-		for image in tqdm(image_paths):
-			image_pixels = plt.imread(image)
-			image_pixels = cv2.resize(image_pixels, (SimCLRExtractor.n_px, SimCLRExtractor.n_px))
-			image_pixels = image_pixels / 255.
-
-			images.append(image_pixels)
-
-		images = np.array(images)
+		images = np.array([image/255 for image in resize(SimCLRExtractor.n_px, image_paths)])
 
 		if visualize:
-			print(os.path.basename(os.path.dirname(image_paths[0])))
-			f, axes = plt.subplots(1, len(image_paths), dpi=300)
-			for img, ax in zip(images, axes):
-				ax.axis('off')
-				ax.imshow(img)
-			plt.show()
+			self.visualize(images, image_paths)
 
 		return images
 
@@ -204,17 +198,12 @@ class GPTExtractor(EmbeddingExtractor):
 			x_norm.shape[:-1])  # map pixels to closest color cluster
 
 		if visualize:
-			print(os.path.basename(os.path.dirname(image_paths[0])))
 			samples_img = [
 				np.reshape(
 					np.rint(127.5 * (self.clusters[s] + 1.0)), [self.n_px, self.n_px, 3]
 				).astype(np.uint8) for s in samples
 			]  # convert color clusters back to pixels
-			f, axes = plt.subplots(1, len(image_paths), dpi=300)
-			for img, ax in zip(samples_img, axes):
-				ax.axis('off')
-				ax.imshow(img)
-			plt.show()
+			self.visualize(samples_img, image_paths)
 		# print("Shape of samples: ", samples.shape)
 		return samples
 
