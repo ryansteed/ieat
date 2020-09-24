@@ -11,4 +11,5 @@ dependencies:
     - pandas
     - requests
     - itables
+    - tensorflow-hub
 
