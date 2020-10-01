@@ -157,7 +157,7 @@ def test_all(
 
 
 def _load_model(model_type, *model_params, **model_kwargs):
-	if model_type == "logit":
+	if model_type == "igpt-logit":
 		return LogitExtractor(
 			model_type,
 			*model_params,
@@ -169,7 +169,7 @@ def _load_model(model_type, *model_params, **model_kwargs):
 			*model_params,
 			**model_kwargs
 		)
-	elif model_type == "openai":
+	elif model_type == "igpt":
 		return OpenAIExtractor(
 			model_type,
 			*model_params,
@@ -202,7 +202,7 @@ if __name__ == "__main__":
 			# 	color_clusters_dir,
 			# 	n_px
 			# ),
-			# "openai": (
+			# "igpt": (
 			# 	model_size,
 			# 	models_dir,
 			# 	color_clusters_dir,

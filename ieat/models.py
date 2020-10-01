@@ -144,6 +144,7 @@ class SimCLRExtractor(EmbeddingExtractor):
 
 	def _extract_context(self, samples, gpu, **extract_kwargs) -> np.ndarray:
 		output = self.sess.run(self.model, {self.images: samples})
+		# 'default' is the representation output of the base ResNet network
 		encs = output['default']
 		return encs
 
