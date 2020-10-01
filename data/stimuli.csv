@@ -104,13 +104,15 @@ Insect-Flower,Flower,Daisy,Google Image Search,Yes,,5
 Insect-Flower,Flower,Lilac,Google Image Search,Yes,,5
 Insect-Flower,Flower,Lily,Google Image Search,Yes,,5
 Arab-Muslim,Arab Muslims,Arab mu,Google Image Search,Yes,arab-muslim person,10
+Intersectional,Black Female,Black Female,Google Image Search,Yes,black female plain background,20
+Intersectional,Black Male,Black Male,Google Image Search,Yes,black male plain background,20
+Intersectional,White Female,White Female,Google Image Search,Yes,white female plain background,20
+Intersectional,White Male,White Male,Google Image Search,Yes,white male plain background,20
 "Arab-Muslim, Disability",Other People,Other people,Google Image Search,Yes,"african american, caucasian + white background",10
 Weapon-Modern,Weapon-Modern,Weapon,Google Image Search,Yes,"axe, grenade, machete",9
 Weapon-Modern,White,N/A,Project Implicit,Yes,,
 Weapon-Modern,Tool-Modern,Tool,Google Image Search,Yes,"bottle, camera, coke, ice cream, phone, wallet, phone with headphones, watch, book",9
 Weapon-Modern,Black,N/A,Project Implicit,Yes,,
 Disability,Disabled/Abled,N/A,Project Implicit,Yes,,
-Race,African American,African American,Google Image Search,No,From Aylin's appearance bias data,
-Race,European American,European American,Google Image Search,No,From Aylin's appearance bias data,
-Skin-Tone,Light,Light,,No,,
-Skin-Tone,Dark,Dark,,No,,
+Skin-Tone,Light,Light,Project Implicit,Yes,,
+Skin-Tone,Dark,Dark,Project Implicit,Yes,,
