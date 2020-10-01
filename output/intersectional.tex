@@ -1,4 +1,25 @@
-\begin{tabular}{llllll}
+\begin{tabular}{llllllllll}
 \toprule
+                         &        &         $X$ &           $Y$ &         $A$ &           $B$ &      $d$ &    $p$ & $n_t$ & $n_a$ \\
+Test & Model &             &               &             &               &          &        &       &       \\
+\midrule
+Intersectional-Gender-Career-WMBF & igpt &      career &        family &  white-male &  black-female &     0.22 &  0.247 &    21 &    20 \\
+                         & simclr &      career &        family &  white-male &  black-female &   0.64** &  0.018 &    21 &    20 \\
+Intersectional-Gender-Career-WMBM & igpt &      career &        family &  white-male &    black-male &    -0.82 &  0.997 &    21 &    20 \\
+                         & simclr &      career &        family &  white-male &    black-male &    -0.16 &  0.692 &    21 &    20 \\
+Intersectional-Gender-Career-WMWF & igpt &      career &        family &  white-male &  white-female &   0.55** &  0.034 &    21 &    20 \\
+                         & simclr &      career &        family &  white-male &  white-female &  0.97*** &  0.001 &    21 &    20 \\
+Intersectional-Gender-Science-WMBF & igpt &     science &  liberal-arts &  white-male &    black-male &   0.67** &  0.015 &    21 &    20 \\
+                         & simclr &     science &  liberal-arts &  white-male &    black-male &  0.78*** &  0.006 &    21 &    20 \\
+Intersectional-Gender-Science-WMBM & igpt &     science &  liberal-arts &  white-male &    black-male &   0.67** &  0.014 &    21 &    20 \\
+                         & simclr &     science &  liberal-arts &  white-male &    black-male &  0.78*** &  0.005 &    21 &    20 \\
+Intersectional-Gender-Science-WMWF & igpt &     science &  liberal-arts &  white-male &  white-female &    -0.37 &  0.882 &    21 &    20 \\
+                         & simclr &     science &  liberal-arts &  white-male &  white-female &    -0.34 &  0.864 &    21 &    20 \\
+Intersectional-Race-WMBF & igpt &  white-male &  black-female &    pleasant &    unpleasant &  0.83*** &  0.003 &    20 &    55 \\
+                         & simclr &  white-male &  black-female &    pleasant &    unpleasant &    -0.15 &  0.674 &    20 &    55 \\
+Intersectional-Race-WMBM & igpt &  white-male &    black-male &    pleasant &    unpleasant &  0.88*** &  0.002 &    20 &    55 \\
+                         & simclr &  white-male &    black-male &    pleasant &    unpleasant &    -0.20 &  0.735 &    20 &    55 \\
+Intersectional-Race-WMWF & igpt &  white-male &  white-female &    pleasant &    unpleasant &    -0.79 &  0.995 &    20 &    55 \\
+                         & simclr &  white-male &  white-female &    pleasant &    unpleasant &    -0.46 &  0.926 &    20 &    55 \\
 \bottomrule
 \end{tabular}

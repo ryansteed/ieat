@@ -129,6 +129,10 @@ def test_all(
 		# Intersectional IATs
 		# - Gender Stereotypes
 		TestData(
+			'Intersectional-Gender-Science-MF', 'gender/science', 'gender/liberal-arts', 'intersectional/male',
+			'intersectional/female'
+		),
+		TestData(
 			'Intersectional-Gender-Science-WMBM', 'gender/science', 'gender/liberal-arts', 'intersectional/white-male',
 			'intersectional/black-male'
 		),
@@ -152,17 +156,21 @@ def test_all(
 			'Intersectional-Gender-Career-WMWF', 'gender/career', 'gender/family', 'intersectional/white-male',
 			'intersectional/white-female'
 		),
-		# - Race Valence
+		# - Valence
 		TestData(
-			'Intersectional-Race-WMBM', 'intersectional/white-male', 'intersectional/black-male', 'valence/pleasant',
+			'Intersectional-Valence-BW', 'intersectional/white', 'intersectional/black', 'valence/pleasant',
 			'valence/unpleasant'
 		),
 		TestData(
-			'Intersectional-Race-WMBF', 'intersectional/white-male', 'intersectional/black-female', 'valence/pleasant',
+			'Intersectional-Valence-WMBM', 'intersectional/white-male', 'intersectional/black-male', 'valence/pleasant',
 			'valence/unpleasant'
 		),
 		TestData(
-			'Intersectional-Race-WMWF', 'intersectional/white-male', 'intersectional/white-female', 'valence/pleasant',
+			'Intersectional-Valence-WMBF', 'intersectional/white-male', 'intersectional/black-female', 'valence/pleasant',
+			'valence/unpleasant'
+		),
+		TestData(
+			'Intersectional-Valence-WMWF', 'intersectional/white-male', 'intersectional/white-female', 'valence/pleasant',
 			'valence/unpleasant'
 		)
 	]
