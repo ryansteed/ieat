@@ -235,24 +235,24 @@ if __name__ == "__main__":
 
 	print(test_all(
 		model_types={
-			# "logit": (
-			# 	model_size,
-			# 	models_dir,
-			# 	color_clusters_dir,
-			# 	n_px
-			# ),
-			# "igpt": (
-			# 	model_size,
-			# 	models_dir,
-			# 	color_clusters_dir,
-			# 	n_px
-			# ),
-			"simclr": (
-				depth,
-				width,
-				sk
+			"igpt-logit": (
+			 	model_size,
+			 	models_dir,
+			 	color_clusters_dir,
+			 	n_px
+			 ),
+			"igpt": (
+				model_size,
+			 	models_dir,
+			 	color_clusters_dir,
+			 	n_px
 			)
+			#"simclr": (
+			#	depth,
+			#	width,
+			#	sk
+			#)
 		},
-		gpu=True,
+		gpu=False,
 		from_cache=True
 	))
