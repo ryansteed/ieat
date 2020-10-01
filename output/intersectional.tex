@@ -3,29 +3,31 @@
                             &        &           $X$ &           $Y$ &           $A$ &           $B$ &      $d$ &    $p$ & $n_t$ & $n_a$ \\
 Test & Model &               &               &               &               &          &        &       &       \\
 \midrule
-Intersectional-Gender-Career-MF & igpt &        career &        family &          male &        female &  0.88*** &  0.002 &    21 &    40 \\
+Intersectional-Gender-Career-MF & igpt &        career &        family &          male &        female &  0.88*** &  0.001 &    21 &    40 \\
                             & simclr &        career &        family &          male &        female &  0.99*** &  0.000 &    21 &    40 \\
-Intersectional-Gender-Career-WMBF & igpt &        career &        family &    white-male &  black-female &     0.22 &  0.246 &    21 &    20 \\
+Intersectional-Gender-Career-WMBF & igpt &        career &        family &    white-male &  black-female &     0.22 &  0.247 &    21 &    20 \\
                             & simclr &        career &        family &    white-male &  black-female &   0.64** &  0.018 &    21 &    20 \\
-Intersectional-Gender-Career-WMBM & igpt &        career &        family &    black-male &    white-male &  0.82*** &  0.003 &    21 &    20 \\
-                            & simclr &        career &        family &    black-male &    white-male &     0.16 &  0.313 &    21 &    20 \\
-Intersectional-Gender-Career-WMWF & igpt &        career &        family &    white-male &  white-female &   0.55** &  0.038 &    21 &    20 \\
+Intersectional-Gender-Career-WMBM & igpt &        career &        family &    black-male &    white-male &  0.82*** &  0.005 &    21 &    20 \\
+                            & simclr &        career &        family &    black-male &    white-male &     0.16 &  0.301 &    21 &    20 \\
+Intersectional-Gender-Career-WMWF & igpt &        career &        family &    white-male &  white-female &   0.55** &  0.037 &    21 &    20 \\
                             & simclr &        career &        family &    white-male &  white-female &  0.97*** &  0.001 &    21 &    20 \\
-Intersectional-Gender-Science-MF & igpt &       science &  liberal-arts &          male &        female &    -0.01 &  0.509 &    21 &    40 \\
-                            & simclr &       science &  liberal-arts &          male &        female &    -0.32 &  0.850 &    21 &    40 \\
+Intersectional-Gender-Science-MF & igpt &       science &  liberal-arts &          male &        female &    -0.01 &  0.521 &    21 &    40 \\
+                            & simclr &       science &  liberal-arts &          male &        female &    -0.32 &  0.852 &    21 &    40 \\
 Intersectional-Gender-Science-WMBF & igpt &       science &  liberal-arts &    white-male &  black-female &  1.09*** &  0.000 &    21 &    20 \\
-                            & simclr &       science &  liberal-arts &    white-male &  black-female &  0.90*** &  0.001 &    21 &    20 \\
-Intersectional-Gender-Science-WMBM & igpt &       science &  liberal-arts &    white-male &    black-male &   0.67** &  0.014 &    21 &    20 \\
+                            & simclr &       science &  liberal-arts &    white-male &  black-female &  0.90*** &  0.002 &    21 &    20 \\
+Intersectional-Gender-Science-WMBM & igpt &       science &  liberal-arts &    white-male &    black-male &   0.67** &  0.013 &    21 &    20 \\
                             & simclr &       science &  liberal-arts &    white-male &    black-male &  0.78*** &  0.005 &    21 &    20 \\
-Intersectional-Gender-Science-WMWF & igpt &       science &  liberal-arts &  white-female &    white-male &     0.37 &  0.122 &    21 &    20 \\
-                            & simclr &       science &  liberal-arts &  white-female &    white-male &     0.34 &  0.132 &    21 &    20 \\
+Intersectional-Gender-Science-WMWF & igpt &       science &  liberal-arts &  white-female &    white-male &     0.37 &  0.117 &    21 &    20 \\
+                            & simclr &       science &  liberal-arts &  white-female &    white-male &     0.34 &  0.133 &    21 &    20 \\
 Intersectional-Valence-BW & igpt &         white &         black &      pleasant &    unpleasant &  1.16*** &  0.000 &    40 &    55 \\
-                            & simclr &         white &         black &      pleasant &    unpleasant &     0.06 &  0.382 &    40 &    55 \\
+                            & simclr &         white &         black &      pleasant &    unpleasant &     0.06 &  0.384 &    40 &    55 \\
+Intersectional-Valence-WFBM & igpt &  white-female &    black-male &      pleasant &    unpleasant &  1.46*** &  0.000 &    20 &    55 \\
+                            & simclr &  white-female &    black-male &      pleasant &    unpleasant &     0.23 &  0.226 &    20 &    55 \\
 Intersectional-Valence-WMBF & igpt &    white-male &  black-female &      pleasant &    unpleasant &  0.83*** &  0.004 &    20 &    55 \\
-                            & simclr &    white-male &  black-female &      pleasant &    unpleasant &    -0.15 &  0.669 &    20 &    55 \\
+                            & simclr &    white-male &  black-female &      pleasant &    unpleasant &    -0.15 &  0.675 &    20 &    55 \\
 Intersectional-Valence-WMBM & igpt &    white-male &    black-male &      pleasant &    unpleasant &  0.88*** &  0.002 &    20 &    55 \\
                             & simclr &    white-male &    black-male &      pleasant &    unpleasant &    -0.20 &  0.743 &    20 &    55 \\
 Intersectional-Valence-WMWF & igpt &  white-female &    white-male &      pleasant &    unpleasant &  0.79*** &  0.004 &    20 &    55 \\
-                            & simclr &  white-female &    white-male &      pleasant &    unpleasant &    0.46* &  0.073 &    20 &    55 \\
+                            & simclr &  white-female &    white-male &      pleasant &    unpleasant &    0.46* &  0.071 &    20 &    55 \\
 \bottomrule
 \end{tabular}

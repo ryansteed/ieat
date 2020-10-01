@@ -176,6 +176,10 @@ def test_all(
 		TestData(
 			'Intersectional-Valence-WMWF', 'intersectional/white-female', 'intersectional/white-male', 'valence/pleasant',
 			'valence/unpleasant'
+		),
+		TestData(
+			'Intersectional-Valence-WFBM', 'intersectional/white-female', 'intersectional/black-male', 'valence/pleasant',
+			'valence/unpleasant'
 		)
 	]
 
