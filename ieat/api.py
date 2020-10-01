@@ -138,15 +138,19 @@ def test_all(
 		),
 		TestData(
 			'Intersectional-Gender-Science-WMBF', 'gender/science', 'gender/liberal-arts', 'intersectional/white-male',
-			'intersectional/black-male'
+			'intersectional/black-female'
 		),
 		TestData(
-			'Intersectional-Gender-Science-WMWF', 'gender/science', 'gender/liberal-arts', 'intersectional/white-male',
-			'intersectional/white-female'
+			'Intersectional-Gender-Science-WMWF', 'gender/science', 'gender/liberal-arts', 'intersectional/white-female',
+			'intersectional/white-male'
 		),
 		TestData(
-			'Intersectional-Gender-Career-WMBM', 'gender/career', 'gender/family', 'intersectional/white-male',
-			'intersectional/black-male'
+			'Intersectional-Gender-Career-MF', 'gender/career', 'gender/family', 'intersectional/male',
+			'intersectional/female'
+		),
+		TestData(
+			'Intersectional-Gender-Career-WMBM', 'gender/career', 'gender/family', 'intersectional/black-male',
+			'intersectional/white-male'
 		),
 		TestData(
 			'Intersectional-Gender-Career-WMBF', 'gender/career', 'gender/family', 'intersectional/white-male',
@@ -170,7 +174,7 @@ def test_all(
 			'valence/unpleasant'
 		),
 		TestData(
-			'Intersectional-Valence-WMWF', 'intersectional/white-male', 'intersectional/white-female', 'valence/pleasant',
+			'Intersectional-Valence-WMWF', 'intersectional/white-female', 'intersectional/white-male', 'valence/pleasant',
 			'valence/unpleasant'
 		)
 	]
