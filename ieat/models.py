@@ -33,7 +33,7 @@ class EmbeddingExtractor:
 	def load_model(self):
 		raise NotImplementedError
 
-	def extract_dir(self, d, file_types, batch_size=None, visualize=False, **extract_params):
+	def extract_dir(self, d, file_types=(".jpg", ".jpeg", ".png", ".webp"), batch_size=None, visualize=False, **extract_params):
 		embedding_path = self.make_embedding_path(d)
 		image_paths = [
 			os.path.join(d, f) for f in os.listdir(d)

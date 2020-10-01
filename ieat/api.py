@@ -54,8 +54,8 @@ def test(
 	for d in input_dirs:
 		logger.progress(f"Extracting images from {d}")
 		embeddings.append(extractor.extract_dir(
-			d, file_types, 
-			visualize=verbose, 
+			d, file_types,
+			visualize=verbose,
 			gpu=gpu,
 			batch_size=batch_size
 		))
@@ -125,7 +125,46 @@ def test_all(
 		TestData('Age', 'age/young', 'age/old', 'valence/pleasant', 'valence/unpleasant'),
 		# Stereotype IATS
 		TestData('Gender-Science', 'gender/science', 'gender/liberal-arts', 'gender/male', 'gender/female'),
-		TestData('Gender-Career', 'gender/career', 'gender/family', 'gender/male', 'gender/female')
+		TestData('Gender-Career', 'gender/career', 'gender/family', 'gender/male', 'gender/female'),
+		# Intersectional IATs
+		# - Gender Stereotypes
+		TestData(
+			'Intersectional-Gender-Science-WMBM', 'gender/science', 'gender/liberal-arts', 'intersectional/white-male',
+			'intersectional/black-male'
+		),
+		TestData(
+			'Intersectional-Gender-Science-WMBF', 'gender/science', 'gender/liberal-arts', 'intersectional/white-male',
+			'intersectional/black-male'
+		),
+		TestData(
+			'Intersectional-Gender-Science-WMWF', 'gender/science', 'gender/liberal-arts', 'intersectional/white-male',
+			'intersectional/white-female'
+		),
+		TestData(
+			'Intersectional-Gender-Career-WMBM', 'gender/career', 'gender/family', 'intersectional/white-male',
+			'intersectional/black-male'
+		),
+		TestData(
+			'Intersectional-Gender-Career-WMBF', 'gender/career', 'gender/family', 'intersectional/white-male',
+			'intersectional/black-female'
+		),
+		TestData(
+			'Intersectional-Gender-Career-WMWF', 'gender/career', 'gender/family', 'intersectional/white-male',
+			'intersectional/white-female'
+		),
+		# - Race Valence
+		TestData(
+			'Intersectional-Race-WMBM', 'intersectional/white-male', 'intersectional/black-male', 'valence/pleasant',
+			'valence/unpleasant'
+		),
+		TestData(
+			'Intersectional-Race-WMBF', 'intersectional/white-male', 'intersectional/black-female', 'valence/pleasant',
+			'valence/unpleasant'
+		),
+		TestData(
+			'Intersectional-Race-WMWF', 'intersectional/white-male', 'intersectional/white-female', 'valence/pleasant',
+			'valence/unpleasant'
+		)
 	]
 
 	logger.setLevel(progress_level)
