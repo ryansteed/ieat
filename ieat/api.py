@@ -180,6 +180,18 @@ def test_all(
 		TestData(
 			'Intersectional-Valence-WFBM', 'intersectional/white-female', 'intersectional/black-male', 'valence/pleasant',
 			'valence/unpleasant'
+		),
+		TestData(
+			'Intersectional-Valence-BFBM', 'intersectional/black-female', 'intersectional/black-male', 'valence/pleasant',
+			'valence/unpleasant'
+		),
+		TestData(
+			'Intersectional-Valence-WFBF', 'intersectional/white-female', 'intersectional/black-female', 'valence/pleasant',
+			'valence/unpleasant'
+		),
+		TestData(
+			'Intersectional-Valence-FM', 'intersectional/female', 'intersectional/male', 'valence/pleasant',
+			'valence/unpleasant'
 		)
 	]
 
