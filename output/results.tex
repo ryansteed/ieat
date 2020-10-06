@@ -1,52 +1,36 @@
-\begin{tabular}{llllll}
+\begin{tabular}{llllllllllr}
 \toprule
-       &        &      $d$ &    $p$ & $n_t$ & $n_a$ \\
-Test & Model &          &        &       &       \\
+{} &                $X$ &               $Y$ &            $A$ &              $B$ & $n_t$ & $n_a$ &   Model &                       $d$ &         $p$ &                  IAT $d$ \\
 \midrule
-Age & igpt &     0.42 &  0.241 &     6 &    55 \\
-       & igpt-logit &     0.38 &  0.376 &     6 &    55 \\
-       & simclr &     0.59 &  0.160 &     6 &    55 \\
-Arab-Muslim & igpt &   0.86** &  0.027 &    10 &    55 \\
-       & igpt-logit &     0.06 &  0.430 &    10 &    55 \\
-       & simclr &  1.06*** &  0.004 &    10 &    55 \\
-Asian & igpt &     0.25 &  0.337 &     6 &     6 \\
-       & igpt-logit &     0.25 &  0.357 &     6 &     6 \\
-       & simclr &     0.47 &  0.209 &     6 &     6 \\
-Disability & igpt &    -0.02 &  0.529 &     4 &    55 \\
-       & igpt-logit &    -0.65 &  0.757 &     4 &    55 \\
-       & simclr &     0.38 &  0.343 &     4 &    55 \\
-Gender-Career & igpt &   0.65** &  0.016 &    21 &    40 \\
-       & igpt-logit &     0.05 &  0.432 &    21 &    40 \\
-       & simclr &  0.99*** &  0.000 &    21 &    40 \\
-Gender-Science & igpt &   0.60** &  0.026 &    21 &    40 \\
-       & igpt-logit &    0.47* &  0.063 &    21 &    40 \\
-       & simclr &    -0.13 &  0.664 &    21 &    40 \\
-Insect-Flower & igpt &    0.34* &  0.073 &    35 &    55 \\
-       & igpt-logit &    -0.32 &  0.913 &    35 &    55 \\
-       & simclr &  1.69*** &  0.000 &    35 &    55 \\
-Native & igpt &    -0.33 &  0.743 &     8 &     5 \\
-       & igpt-logit &     0.32 &  0.269 &     8 &     5 \\
-       & simclr &    -0.19 &  0.635 &     8 &     5 \\
-Race & igpt &    -0.62 &  0.846 &     6 &    55 \\
-       & igpt-logit &    -0.17 &  0.618 &     6 &    55 \\
-       & simclr &    -0.57 &  0.827 &     6 &    55 \\
-Religion & igpt &     0.37 &  0.253 &     7 &    55 \\
-       & igpt-logit &     0.29 &  0.300 &     7 &    55 \\
-       & simclr &     0.36 &  0.260 &     7 &    55 \\
-Sexuality & igpt &    -0.03 &  0.524 &     9 &    55 \\
-       & igpt-logit &    0.69* &  0.071 &     9 &    55 \\
-       & simclr &     0.04 &  0.469 &     9 &    55 \\
-Skin-Tone & igpt &  1.26*** &  0.007 &     7 &    55 \\
-       & igpt-logit &     0.42 &  0.362 &     7 &    55 \\
-       & simclr &    -0.19 &  0.714 &     7 &    55 \\
-Weapon & igpt &    0.86* &  0.068 &     6 &     7 \\
-       & igpt-logit &    -1.64 &  0.999 &     6 &     7 \\
-       & simclr &  1.38*** &  0.009 &     6 &     7 \\
-Weapon (Modern) & igpt &    0.88* &  0.061 &     6 &     9 \\
-       & igpt-logit &    -1.19 &  0.981 &     6 &     9 \\
-       & simclr &   1.28** &  0.011 &     6 &     9 \\
-Weight & igpt &  1.67*** &  0.000 &    10 &    55 \\
-       & igpt-logit &    -0.84 &  0.970 &    10 &    55 \\
-       & simclr &    -0.30 &  0.737 &    10 &    55 \\
+Age\textsuperscript{\textdagger}        &              Young &               Old &       Pleasant &       Unpleasant &     6 &    55 &    iGPT &   \cellcolor{d_small}0.42 &        0.24 &  \cellcolor{d_large}1.23 \\
+                                        &                    &                   &                &                  &     6 &    55 &  SimCLR &  \cellcolor{d_medium}0.59 &        0.16 &  \cellcolor{d_large}1.23 \\
+Arab-Muslim                             &              Other &       Arab-muslim &       Pleasant &       Unpleasant &    10 &    55 &    iGPT &   \cellcolor{d_large}0.86 &        0.03 &  \cellcolor{d_small}0.33 \\
+                                        &                    &                   &                &                  &    10 &    55 &  SimCLR &   \cellcolor{d_large}1.06 &  $<10^{-2}$ &  \cellcolor{d_small}0.33 \\
+Asian\textsuperscript{$\mathsection$}   &  European American &    Asian American &       American &          Foreign &     6 &     6 &    iGPT &   \cellcolor{d_small}0.25 &        0.34 & \cellcolor{d_medium}0.62 \\
+                                        &                    &                   &                &                  &     6 &     6 &  SimCLR &   \cellcolor{d_small}0.47 &        0.21 & \cellcolor{d_medium}0.62 \\
+Disability\textsuperscript{\textdagger} &           Disabled &             Abled &       Pleasant &       Unpleasant &     4 &    55 &    iGPT &                     -0.02 &        0.53 &  \cellcolor{d_large}1.05 \\
+                                        &                    &                   &                &                  &     4 &    55 &  SimCLR &   \cellcolor{d_small}0.38 &        0.34 &  \cellcolor{d_large}1.05 \\
+Gender-Career                           &             Career &            Family &           Male &           Female &    21 &    40 &    iGPT &  \cellcolor{d_medium}0.65 &        0.02 &   \cellcolor{d_large}1.1 \\
+                                        &                    &                   &                &                  &    21 &    40 &  SimCLR &   \cellcolor{d_large}0.99 &  $<10^{-3}$ &   \cellcolor{d_large}1.1 \\
+Gender-Science                          &            Science &      Liberal Arts &           Male &           Female &    21 &    40 &    iGPT &  \cellcolor{d_medium}0.60 &        0.02 &  \cellcolor{d_large}0.93 \\
+                                        &                    &                   &                &                  &    21 &    40 &  SimCLR &                     -0.13 &        0.67 &  \cellcolor{d_large}0.93 \\
+Insect-Flower                           &             Flower &            Insect &       Pleasant &       Unpleasant &    35 &    55 &    iGPT &   \cellcolor{d_small}0.34 &        0.08 &  \cellcolor{d_large}1.35 \\
+                                        &                    &                   &                &                  &    35 &    55 &  SimCLR &   \cellcolor{d_large}1.69 &  $<10^{-3}$ &  \cellcolor{d_large}1.35 \\
+Native\textsuperscript{$\mathsection$}  &  European American &   Native American &           U.S. &            World &     8 &     5 &    iGPT &                     -0.33 &        0.74 &  \cellcolor{d_small}0.46 \\
+                                        &                    &                   &                &                  &     8 &     5 &  SimCLR &                     -0.19 &        0.65 &  \cellcolor{d_small}0.46 \\
+Race\textsuperscript{\textdagger}       &  European American &  African American &       Pleasant &       Unpleasant &     6 &    55 &    iGPT &                     -0.62 &        0.85 &  \cellcolor{d_large}0.86 \\
+                                        &                    &                   &                &                  &     6 &    55 &  SimCLR &                     -0.57 &        0.83 &  \cellcolor{d_large}0.86 \\
+Religion                                &       Christianity &           Judaism &       Pleasant &       Unpleasant &     7 &    55 &    iGPT &   \cellcolor{d_small}0.37 &        0.25 &                    -0.34 \\
+                                        &                    &                   &                &                  &     7 &    55 &  SimCLR &   \cellcolor{d_small}0.36 &        0.26 &                    -0.34 \\
+Sexuality                               &                Gay &          Straight &       Pleasant &       Unpleasant &     9 &    55 &    iGPT &                     -0.03 &        0.52 & \cellcolor{d_medium}0.74 \\
+                                        &                    &                   &                &                  &     9 &    55 &  SimCLR &                      0.04 &        0.47 & \cellcolor{d_medium}0.74 \\
+Skin-Tone\textsuperscript{\textdagger}  &              Light &              Dark &       Pleasant &       Unpleasant &     7 &    55 &    iGPT &   \cellcolor{d_large}1.26 &  $<10^{-2}$ & \cellcolor{d_medium}0.73 \\
+                                        &                    &                   &                &                  &     7 &    55 &  SimCLR &                     -0.19 &        0.71 & \cellcolor{d_medium}0.73 \\
+Weapon\textsuperscript{$\mathsection$}  &              White &             Black &           Tool &           Weapon &     6 &     7 &    iGPT &   \cellcolor{d_large}0.86 &        0.07 &   \cellcolor{d_large}1.0 \\
+                                        &                    &                   &                &                  &     6 &     7 &  SimCLR &   \cellcolor{d_large}1.38 &  $<10^{-2}$ &   \cellcolor{d_large}1.0 \\
+Weapon (Modern)                         &              White &             Black &  Tool (Modern) &  Weapon (Modern) &     6 &     9 &    iGPT &   \cellcolor{d_large}0.88 &        0.06 &                      nan \\
+                                        &                    &                   &                &                  &     6 &     9 &  SimCLR &   \cellcolor{d_large}1.28 &        0.01 &                      nan \\
+Weight\textsuperscript{\textdagger}     &               Thin &               Fat &       Pleasant &       Unpleasant &    10 &    55 &    iGPT &   \cellcolor{d_large}1.67 &  $<10^{-3}$ &  \cellcolor{d_large}1.83 \\
+                                        &                    &                   &                &                  &    10 &    55 &  SimCLR &                     -0.30 &        0.73 &  \cellcolor{d_large}1.83 \\
 \bottomrule
 \end{tabular}
