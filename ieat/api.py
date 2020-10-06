@@ -124,41 +124,41 @@ def test_all(
 		),
 		TestData('Age', 'age/young', 'age/old', 'valence/pleasant', 'valence/unpleasant'),
 		# Stereotype IATS
-		TestData('Gender-Science', 'gender/science', 'gender/liberal-arts', 'gender/male', 'gender/female'),
-		TestData('Gender-Career', 'gender/career', 'gender/family', 'gender/male', 'gender/female'),
+		TestData('Gender-Science', 'gender/male', 'gender/female', 'gender/science', 'gender/liberal-arts'),
+		TestData('Gender-Career', 'gender/male', 'gender/female', 'gender/career', 'gender/family'),
 		# Intersectional IATs
 		# - Gender Stereotypes
 		TestData(
-			'Intersectional-Gender-Science-MF', 'gender/science', 'gender/liberal-arts', 'intersectional/male',
-			'intersectional/female'
+			'Intersectional-Gender-Science-MF', 'intersectional/male',
+			'intersectional/female', 'gender/science', 'gender/liberal-arts'
 		),
 		TestData(
-			'Intersectional-Gender-Science-WMBM', 'gender/science', 'gender/liberal-arts', 'intersectional/white-male',
-			'intersectional/black-male'
+			'Intersectional-Gender-Science-WMBM', 'intersectional/white-male',
+			'intersectional/black-male', 'gender/science', 'gender/liberal-arts'
 		),
 		TestData(
-			'Intersectional-Gender-Science-WMBF', 'gender/science', 'gender/liberal-arts', 'intersectional/white-male',
-			'intersectional/black-female'
+			'Intersectional-Gender-Science-WMBF', 'intersectional/white-male',
+			'intersectional/black-female', 'gender/science', 'gender/liberal-arts'
 		),
 		TestData(
-			'Intersectional-Gender-Science-WMWF', 'gender/science', 'gender/liberal-arts', 'intersectional/white-female',
-			'intersectional/white-male'
+			'Intersectional-Gender-Science-WMWF', 'intersectional/white-male',
+			'intersectional/white-female', 'gender/science', 'gender/liberal-arts'
 		),
 		TestData(
-			'Intersectional-Gender-Career-MF', 'gender/career', 'gender/family', 'intersectional/male',
-			'intersectional/female'
+			'Intersectional-Gender-Career-MF', 'intersectional/male',
+			'intersectional/female', 'gender/career', 'gender/family'
 		),
 		TestData(
-			'Intersectional-Gender-Career-WMBM', 'gender/career', 'gender/family', 'intersectional/black-male',
-			'intersectional/white-male'
+			'Intersectional-Gender-Career-WMBM', 'intersectional/black-male',
+			'intersectional/white-male', 'gender/career', 'gender/family'
 		),
 		TestData(
-			'Intersectional-Gender-Career-WMBF', 'gender/career', 'gender/family', 'intersectional/white-male',
-			'intersectional/black-female'
+			'Intersectional-Gender-Career-WMBF', 'intersectional/white-male',
+			'intersectional/black-female', 'gender/career', 'gender/family'
 		),
 		TestData(
-			'Intersectional-Gender-Career-WMWF', 'gender/career', 'gender/family', 'intersectional/white-male',
-			'intersectional/white-female'
+			'Intersectional-Gender-Career-WMWF', 'intersectional/white-male',
+			'intersectional/white-female', 'gender/career', 'gender/family'
 		),
 		# - Valence
 		TestData(
