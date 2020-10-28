@@ -28,6 +28,7 @@ Documentation for the `ieat` API is published at [rbsteed.com/ieat](https://rbst
 To generate the documentation, use `pdoc3`:
 ```
 pdoc3 --html --output-dir docs --force ieat
+git subtree push --prefix docs/ieat origin gh-pages
 ```
 
 ### Tutorials and Replications
@@ -40,9 +41,10 @@ To save changes, choose Save -> Save to Github.
 
 ## Contents
 - `data/` - images and other data used for bias tests in the paper
-- `embeddings/` - location for caching computed embeddings
+- `embeddings/` - location for caching computed embeddings - includes pre-computed embeddings for convenience; 
+to generate your own, use the `from_cache=False` option
 - `ieat/` - software package for generating image embeddings and testing for bias
 - `notebooks/` - Colab notebooks containing tutorials and data exploration
 - `output/` - location for storing results tables
 - `environment.yml` - Conda environment file with dependencies for Jupyter, etc.
-- `html/` - source for [documentation](https://rbsteed.com/ieat)
+- `docs/ieat` - source for [documentation](https://rbsteed.com/ieat)
