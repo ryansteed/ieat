@@ -39,9 +39,10 @@ To open a `.ipynb` file in Colab, navigate to Colab's [Github Interface](http://
 To save changes, choose Save -> Save to Github.
 
 ## Contents
-- `data` - images and other data used for bias tests in the paper
-- `embeddings` - location for caching computed embeddings
-- `ieat` - software package for generating image embeddings and testing for bias
-- `notebooks` - Colab notebooks containing tutorials and data exploration
-- `output` - location for storing results tables
-- `environment.yml` - 
+- `data/` - images and other data used for bias tests in the paper
+- `embeddings/` - location for caching computed embeddings
+- `ieat/` - software package for generating image embeddings and testing for bias
+- `notebooks/` - Colab notebooks containing tutorials and data exploration
+- `output/` - location for storing results tables
+- `environment.yml` - Conda environment file with dependencies for Jupyter, etc.
+- `html/` - source for [documentation](https://rbsteed.com/ieat)
