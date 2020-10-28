@@ -4,3 +4,6 @@
 [submodule "weat"]
 	path = weat
 	url = https://github.com/ryansteed/weat
+[submodule "simclr"]
+	path = simclr
+	url = https://github.com/google-research/simclr
