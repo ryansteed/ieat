@@ -48,21 +48,54 @@ import logging
 os.environ[&#39;CUDA_LAUNCH_BLOCKING&#39;] = &#34;1&#34;
 logger = logging.getLogger()
 
-# # Code adapted from https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT
-# .ipynb # - thanks to the author
+# # Code adapted from
+# https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb
+# - thanks to the author
 
 
 class EmbeddingExtractor:
+        &#34;&#34;&#34;Extracts embeddings from images with a pre-trained model.&#34;&#34;&#34;
         def __init__(self, model_name, from_cache):
+                &#34;&#34;&#34;
+                Parameters
+                ----------
+                model_name : str
+                        A name for this model, used for caching.
+                from_cache : bool
+                        Whether to used cached embeddings.
+                &#34;&#34;&#34;
                 self.from_cache = from_cache
                 self.model_name = model_name
                 self.model = None
 
         def load_model(self):
+                &#34;&#34;&#34;
+                Loads the model, from the web or from the filesystem.
+                &#34;&#34;&#34;
                 raise NotImplementedError
 
         def extract_dir(self, d, file_types=(&#34;.jpg&#34;, &#34;.jpeg&#34;, &#34;.png&#34;, &#34;.webp&#34;), batch_size=None, visualize=False, **extract_params):
-                embedding_path = self.make_embedding_path(d)
+                &#34;&#34;&#34;
+                Extracts embeddings from images in a directory.
+                Parameters
+                ----------
+                d : str
+                        path to a directory of images
+                file_types : list[str]
+                        list of acceptable file extensions for images
+                batch_size : int
+                        number of images processed at a time - helps when you have limited memory
+                visualize : bool
+                        whether to display the images after pre-processing
+                extract_params : dict
+                        additional parameters for extraction
+
+                Returns
+                -------
+                encs : pd.DataFrame
+                        a Pandas dataframe of features - see `EmbeddingExtractor.extract`
+                &#34;&#34;&#34;
+                embedding_path = self._make_embedding_path(d)
                 image_paths = [
                         os.path.join(d, f) for f in os.listdir(d)
                         if os.path.splitext(f)[1] in file_types
@@ -87,6 +120,29 @@ class EmbeddingExtractor:
                 return encs
 
         def extract(self, image_paths, batch_size=None, output_path=None, gpu=False, visualize=False, **extract_kwargs):
+                &#34;&#34;&#34;
+                Extracts features from a set of image paths.
+
+                Parameters
+                ----------
+                image_paths : str
+                        a list of paths to images to extract features for
+                batch_size : int or None
+                        number of images processed at a time - helps when you have limited memory; if None, use just one batch
+                output_path : str or None
+                        path to save a CSV cache file with the extracted features; if none, don&#39;t cache
+                gpu : bool
+                        whether to use GPU (True) or CPU (False)
+                visualize : bool
+                        whether to display the images after pre-processing
+                extract_kwargs : dict
+                        additional parameters for extraction
+
+                Returns
+                -------
+                encs : pd.DataFrame
+                        data frame of features, indexed by the original image path
+                &#34;&#34;&#34;
                 if self.model is None:
                         self.load_model()
                 if batch_size is None:
@@ -115,38 +171,76 @@ class EmbeddingExtractor:
                         return encs.set_index(&#34;img&#34;)
 
         def process_samples(self, image_paths, visualize=False):
+                &#34;&#34;&#34;
+                Pre-process the image samples for embedding extraction.
+
+                Parameters
+                ----------
+                image_paths : list[str]
+                        list of image paths to pre-process
+                visualize : bool
+                        whether to display the images after pre-processing
+
+                Returns
+                -------
+                list
+                        list of processed images, usually as `list[np.ndarray]`
+                &#34;&#34;&#34;
                 raise NotImplementedError
 
         def _extract_context(self, samples, gpu, **extract_kwargs) -&gt; np.ndarray:
                 raise NotImplementedError
 
-        def make_embedding_path(self, d):
+        def _make_embedding_path(self, d):
                 return &#34;embeddings/{}_{}_{}_{}.csv&#34;.format(
                         os.path.basename(os.path.dirname(d)),
                         os.path.basename(d),
                         self.model_name,
-                        self.make_param_path()
+                        self._make_param_path()
                 )
 
-        def make_param_path(self):
+        def _make_param_path(self):
                 raise NotImplementedError
 
         @staticmethod
         def visualize(images, paths):
+                &#34;&#34;&#34;
+                Visualize some preprocessed images.
+
+                Parameters
+                ----------
+                images : list[np.ndarray]
+                        the images, as matrices
+                paths : list[str]
+                        list of the original image paths, so we can get the parent directory
+                &#34;&#34;&#34;
                 print(os.path.basename(os.path.dirname(paths[0])))
-                f, axes = plt.subplots(1, len(image_paths), dpi=300)
+                f, axes = plt.subplots(1, len(images), dpi=300)
                 for img, ax in zip(images, axes):
                         ax.axis(&#39;off&#39;)
                         ax.imshow(img)
                 plt.show()
 
 
-
 class SimCLRExtractor(EmbeddingExtractor):
+        &#34;&#34;&#34;Extractor using the [SimCLR model](https://github.com/google-research/simclr).&#34;&#34;&#34;
         n_px = 224
 
-        def __init__(self, model_name: str, depth: int, width: int, sk: int, from_cache=True):
-                super().__init__(model_name, from_cache)
+        def __init__(self, model_name: str, depth: int, width: int, sk: int, **parent_params):
+                &#34;&#34;&#34;
+                Parameters
+                ----------
+                model_name : str
+                        A name for this model, used for caching.
+                depth : int
+                        Depth of the ResNet used.
+                width : int
+                        Width of the resnet used.
+                sk : bool
+                        Whether to use selective kernels.
+                parent_params
+                &#34;&#34;&#34;
+                super().__init__(model_name, **parent_params)
                 tf.compat.v1.disable_eager_execution()
                 self.depth = depth
                 self.width = width
@@ -176,14 +270,32 @@ class SimCLRExtractor(EmbeddingExtractor):
                 encs = output[&#39;default&#39;]
                 return encs
 
-        def make_param_path(self):
+        def _make_param_path(self):
                 return f&#34;{self.depth}_{self.width}x_sk{self.sk}&#34;
 
 
 class GPTExtractor(EmbeddingExtractor):
+        &#34;&#34;&#34;Extractor using [iGPT](https://github.com/openai/image-gpt). You must download the model manually.&#34;&#34;&#34;
         MODELS = {&#34;l&#34;: (1536, 16, 48), &#34;m&#34;: (1024, 8, 36), &#34;s&#34;: (512, 8, 24)}
 
-        def __init__(self, model_name, model_size, models_dir, color_clusters_dir, n_px, from_cache=True):
+        def __init__(self, model_name, model_size, models_dir, color_clusters_dir, n_px, **parent_params):
+                &#34;&#34;&#34;
+
+                Parameters
+                ----------
+                model_name : str
+                        A name for this model, used for caching.
+                model_size : str
+                        The size of iGPT used - &#34;s&#34; for small, &#34;m&#34; for medium, or &#34;l&#34; for large. The exact parameters are stored in
+                        `GPTExtractor.MODELS`.
+                models_dir : str
+                        Path to directory with downloaded model. Make sure the params match the downloaded model.
+                color_clusters_dir : str
+                        Path to directory with the downloaded color clusters.
+                n_px : int
+                        The number of pixels used. All publicly available versions of iGPT are 32x32.
+                parent_params
+                &#34;&#34;&#34;
                 super().__init__(model_name, from_cache)
 
                 self.n_px = n_px
@@ -236,13 +348,28 @@ class GPTExtractor(EmbeddingExtractor):
                 # print(&#34;Shape of samples: &#34;, samples.shape)
                 return samples
 
-        def make_param_path(self):
+        def _make_param_path(self):
                 return &#34;{}_{}&#34;.format(
                         self.model_size,
                         self.n_px
                 )
 
         def model_output(self, samples, gpu):
+                &#34;&#34;&#34;
+                Model output from every layer for a given input image.
+                Embeddings can be extracted and aggregated from different layers (see the child classes).
+
+                Parameters
+                ----------
+                samples : np.ndarray
+                gpu : bool
+                        whether to use GPU (True) or CPU (False)
+
+                Returns
+                -------
+                output : tuple(torch.FloatTensor)
+                        a Tensor of all hidden states
+                &#34;&#34;&#34;
                 context = np.concatenate(
                         (
                                 np.full((samples.shape[0], 1), self.vocab_size - 1),
@@ -256,6 +383,7 @@ class GPTExtractor(EmbeddingExtractor):
 
 
 class LogitExtractor(GPTExtractor):
+        &#34;&#34;&#34;Extractor for iGPT logit (projection head) layer.&#34;&#34;&#34;
         def _extract_context(self, samples, gpu, **extract_kwargs) -&gt; np.ndarray:
                 output = self.model_output(samples, gpu)
                 # just use the logit layer
@@ -266,6 +394,7 @@ class LogitExtractor(GPTExtractor):
 
 
 class SENTExtractor(GPTExtractor):
+        &#34;&#34;&#34;Extractor for last position of the last layer output.&#34;&#34;&#34;
         def _extract_context(self, samples, gpu, **extract_kwargs)  -&gt; np.ndarray:
                 &#34;&#34;&#34;
                 SENT uses the last hidden layer output.
@@ -282,7 +411,7 @@ class SENTExtractor(GPTExtractor):
 
 class OpenAIExtractor(GPTExtractor):
         &#34;&#34;&#34;
-        OpenAI strategy:
+        Pooled extraction method, used by the iGPT authors for linear evaluation.
         1. find $n^l = layer\_norm(h^l)$
         2. average pool across the sequence dimension:
         $$ f^l = \langle n^l_i \rangle_i $$
@@ -301,6 +430,10 @@ class OpenAIExtractor(GPTExtractor):
 
 
 class ln_mod(nn.Module):
+        &#34;&#34;&#34;
+        Torch module for the iGPT modified linear head.
+        From [apeguero1](https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb).
+        &#34;&#34;&#34;
         def __init__(self, nx, eps=1e-5):
                 super().__init__()
                 self.eps = eps
@@ -314,7 +447,8 @@ class ln_mod(nn.Module):
 
 def load_tf_weights_in_image_gpt2(model, config, gpt2_checkpoint_path):
         &#34;&#34;&#34;
-        Load tf checkpoints in a pytorch model
+        Load tf checkpoints in a custom pytorch model.
+        From [apeguero1](https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb).
         &#34;&#34;&#34;
         try:
                 import re
@@ -429,6 +563,10 @@ def replace_ln(m, name, config):
 
 
 class ImageGPT2LMHeadModel(GPT2LMHeadModel):
+        &#34;&#34;&#34;
+        Extension of the HuggingFace `GPT2LMHeadModel` for iGPT.
+        From [apeguero1](https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb).
+        &#34;&#34;&#34;
         load_tf_weights = load_tf_weights_in_image_gpt2
 
         def __init__(self, config):
@@ -457,14 +595,16 @@ class ImageGPT2LMHeadModel(GPT2LMHeadModel):
 <span>def <span class="ident">load_tf_weights_in_image_gpt2</span></span>(<span>model, config, gpt2_checkpoint_path)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Load tf checkpoints in a pytorch model</p></div>
+<div class="desc"><p>Load tf checkpoints in a custom pytorch model.
+From <a href="https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb">apeguero1</a>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def load_tf_weights_in_image_gpt2(model, config, gpt2_checkpoint_path):
         &#34;&#34;&#34;
-        Load tf checkpoints in a pytorch model
+        Load tf checkpoints in a custom pytorch model.
+        From [apeguero1](https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb).
         &#34;&#34;&#34;
         try:
                 import re
@@ -597,22 +737,61 @@ class ImageGPT2LMHeadModel(GPT2LMHeadModel):
 <span>(</span><span>model_name, from_cache)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Extracts embeddings from images with a pre-trained model.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>A name for this model, used for caching.</dd>
+<dt><strong><code>from_cache</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to used cached embeddings.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class EmbeddingExtractor:
+        &#34;&#34;&#34;Extracts embeddings from images with a pre-trained model.&#34;&#34;&#34;
         def __init__(self, model_name, from_cache):
+                &#34;&#34;&#34;
+                Parameters
+                ----------
+                model_name : str
+                        A name for this model, used for caching.
+                from_cache : bool
+                        Whether to used cached embeddings.
+                &#34;&#34;&#34;
                 self.from_cache = from_cache
                 self.model_name = model_name
                 self.model = None
 
         def load_model(self):
+                &#34;&#34;&#34;
+                Loads the model, from the web or from the filesystem.
+                &#34;&#34;&#34;
                 raise NotImplementedError
 
         def extract_dir(self, d, file_types=(&#34;.jpg&#34;, &#34;.jpeg&#34;, &#34;.png&#34;, &#34;.webp&#34;), batch_size=None, visualize=False, **extract_params):
-                embedding_path = self.make_embedding_path(d)
+                &#34;&#34;&#34;
+                Extracts embeddings from images in a directory.
+                Parameters
+                ----------
+                d : str
+                        path to a directory of images
+                file_types : list[str]
+                        list of acceptable file extensions for images
+                batch_size : int
+                        number of images processed at a time - helps when you have limited memory
+                visualize : bool
+                        whether to display the images after pre-processing
+                extract_params : dict
+                        additional parameters for extraction
+
+                Returns
+                -------
+                encs : pd.DataFrame
+                        a Pandas dataframe of features - see `EmbeddingExtractor.extract`
+                &#34;&#34;&#34;
+                embedding_path = self._make_embedding_path(d)
                 image_paths = [
                         os.path.join(d, f) for f in os.listdir(d)
                         if os.path.splitext(f)[1] in file_types
@@ -637,6 +816,29 @@ class ImageGPT2LMHeadModel(GPT2LMHeadModel):
                 return encs
 
         def extract(self, image_paths, batch_size=None, output_path=None, gpu=False, visualize=False, **extract_kwargs):
+                &#34;&#34;&#34;
+                Extracts features from a set of image paths.
+
+                Parameters
+                ----------
+                image_paths : str
+                        a list of paths to images to extract features for
+                batch_size : int or None
+                        number of images processed at a time - helps when you have limited memory; if None, use just one batch
+                output_path : str or None
+                        path to save a CSV cache file with the extracted features; if none, don&#39;t cache
+                gpu : bool
+                        whether to use GPU (True) or CPU (False)
+                visualize : bool
+                        whether to display the images after pre-processing
+                extract_kwargs : dict
+                        additional parameters for extraction
+
+                Returns
+                -------
+                encs : pd.DataFrame
+                        data frame of features, indexed by the original image path
+                &#34;&#34;&#34;
                 if self.model is None:
                         self.load_model()
                 if batch_size is None:
@@ -665,26 +867,51 @@ class ImageGPT2LMHeadModel(GPT2LMHeadModel):
                         return encs.set_index(&#34;img&#34;)
 
         def process_samples(self, image_paths, visualize=False):
+                &#34;&#34;&#34;
+                Pre-process the image samples for embedding extraction.
+
+                Parameters
+                ----------
+                image_paths : list[str]
+                        list of image paths to pre-process
+                visualize : bool
+                        whether to display the images after pre-processing
+
+                Returns
+                -------
+                list
+                        list of processed images, usually as `list[np.ndarray]`
+                &#34;&#34;&#34;
                 raise NotImplementedError
 
         def _extract_context(self, samples, gpu, **extract_kwargs) -&gt; np.ndarray:
                 raise NotImplementedError
 
-        def make_embedding_path(self, d):
+        def _make_embedding_path(self, d):
                 return &#34;embeddings/{}_{}_{}_{}.csv&#34;.format(
                         os.path.basename(os.path.dirname(d)),
                         os.path.basename(d),
                         self.model_name,
-                        self.make_param_path()
+                        self._make_param_path()
                 )
 
-        def make_param_path(self):
+        def _make_param_path(self):
                 raise NotImplementedError
 
         @staticmethod
         def visualize(images, paths):
+                &#34;&#34;&#34;
+                Visualize some preprocessed images.
+
+                Parameters
+                ----------
+                images : list[np.ndarray]
+                        the images, as matrices
+                paths : list[str]
+                        list of the original image paths, so we can get the parent directory
+                &#34;&#34;&#34;
                 print(os.path.basename(os.path.dirname(paths[0])))
-                f, axes = plt.subplots(1, len(image_paths), dpi=300)
+                f, axes = plt.subplots(1, len(images), dpi=300)
                 for img, ax in zip(images, axes):
                         ax.axis(&#39;off&#39;)
                         ax.imshow(img)
@@ -701,15 +928,32 @@ class ImageGPT2LMHeadModel(GPT2LMHeadModel):
 <span>def <span class="ident">visualize</span></span>(<span>images, paths)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Visualize some preprocessed images.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>images</code></strong> :&ensp;<code>list[np.ndarray]</code></dt>
+<dd>the images, as matrices</dd>
+<dt><strong><code>paths</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>list of the original image paths, so we can get the parent directory</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def visualize(images, paths):
+        &#34;&#34;&#34;
+        Visualize some preprocessed images.
+
+        Parameters
+        ----------
+        images : list[np.ndarray]
+                the images, as matrices
+        paths : list[str]
+                list of the original image paths, so we can get the parent directory
+        &#34;&#34;&#34;
         print(os.path.basename(os.path.dirname(paths[0])))
-        f, axes = plt.subplots(1, len(image_paths), dpi=300)
+        f, axes = plt.subplots(1, len(images), dpi=300)
         for img, ax in zip(images, axes):
                 ax.axis(&#39;off&#39;)
                 ax.imshow(img)
@@ -723,12 +967,55 @@ def visualize(images, paths):
 <span>def <span class="ident">extract</span></span>(<span>self, image_paths, batch_size=None, output_path=None, gpu=False, visualize=False, **extract_kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Extracts features from a set of image paths.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>image_paths</code></strong> :&ensp;<code>str</code></dt>
+<dd>a list of paths to images to extract features for</dd>
+<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code> or <code>None</code></dt>
+<dd>number of images processed at a time - helps when you have limited memory; if None, use just one batch</dd>
+<dt><strong><code>output_path</code></strong> :&ensp;<code>str</code> or <code>None</code></dt>
+<dd>path to save a CSV cache file with the extracted features; if none, don't cache</dd>
+<dt><strong><code>gpu</code></strong> :&ensp;<code>bool</code></dt>
+<dd>whether to use GPU (True) or CPU (False)</dd>
+<dt><strong><code>visualize</code></strong> :&ensp;<code>bool</code></dt>
+<dd>whether to display the images after pre-processing</dd>
+<dt><strong><code>extract_kwargs</code></strong> :&ensp;<code>dict</code></dt>
+<dd>additional parameters for extraction</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>encs</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>data frame of features, indexed by the original image path</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extract(self, image_paths, batch_size=None, output_path=None, gpu=False, visualize=False, **extract_kwargs):
+        &#34;&#34;&#34;
+        Extracts features from a set of image paths.
+
+        Parameters
+        ----------
+        image_paths : str
+                a list of paths to images to extract features for
+        batch_size : int or None
+                number of images processed at a time - helps when you have limited memory; if None, use just one batch
+        output_path : str or None
+                path to save a CSV cache file with the extracted features; if none, don&#39;t cache
+        gpu : bool
+                whether to use GPU (True) or CPU (False)
+        visualize : bool
+                whether to display the images after pre-processing
+        extract_kwargs : dict
+                additional parameters for extraction
+
+        Returns
+        -------
+        encs : pd.DataFrame
+                data frame of features, indexed by the original image path
+        &#34;&#34;&#34;
         if self.model is None:
                 self.load_model()
         if batch_size is None:
@@ -761,13 +1048,52 @@ def visualize(images, paths):
 <span>def <span class="ident">extract_dir</span></span>(<span>self, d, file_types=('.jpg', '.jpeg', '.png', '.webp'), batch_size=None, visualize=False, **extract_params)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Extracts embeddings from images in a directory.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>d</code></strong> :&ensp;<code>str</code></dt>
+<dd>path to a directory of images</dd>
+<dt><strong><code>file_types</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>list of acceptable file extensions for images</dd>
+<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>number of images processed at a time - helps when you have limited memory</dd>
+<dt><strong><code>visualize</code></strong> :&ensp;<code>bool</code></dt>
+<dd>whether to display the images after pre-processing</dd>
+<dt><strong><code>extract_params</code></strong> :&ensp;<code>dict</code></dt>
+<dd>additional parameters for extraction</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>encs</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>a Pandas dataframe of features - see <code><a title="ieat.models.EmbeddingExtractor.extract" href="#ieat.models.EmbeddingExtractor.extract">EmbeddingExtractor.extract()</a></code></dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extract_dir(self, d, file_types=(&#34;.jpg&#34;, &#34;.jpeg&#34;, &#34;.png&#34;, &#34;.webp&#34;), batch_size=None, visualize=False, **extract_params):
-        embedding_path = self.make_embedding_path(d)
+        &#34;&#34;&#34;
+        Extracts embeddings from images in a directory.
+        Parameters
+        ----------
+        d : str
+                path to a directory of images
+        file_types : list[str]
+                list of acceptable file extensions for images
+        batch_size : int
+                number of images processed at a time - helps when you have limited memory
+        visualize : bool
+                whether to display the images after pre-processing
+        extract_params : dict
+                additional parameters for extraction
+
+        Returns
+        -------
+        encs : pd.DataFrame
+                a Pandas dataframe of features - see `EmbeddingExtractor.extract`
+        &#34;&#34;&#34;
+        embedding_path = self._make_embedding_path(d)
         image_paths = [
                 os.path.join(d, f) for f in os.listdir(d)
                 if os.path.splitext(f)[1] in file_types
@@ -796,43 +1122,15 @@ def visualize(images, paths):
 <span>def <span class="ident">load_model</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Loads the model, from the web or from the filesystem.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def load_model(self):
-        raise NotImplementedError</code></pre>
-</details>
-</dd>
-<dt id="ieat.models.EmbeddingExtractor.make_embedding_path"><code class="name flex">
-<span>def <span class="ident">make_embedding_path</span></span>(<span>self, d)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def make_embedding_path(self, d):
-        return &#34;embeddings/{}_{}_{}_{}.csv&#34;.format(
-                os.path.basename(os.path.dirname(d)),
-                os.path.basename(d),
-                self.model_name,
-                self.make_param_path()
-        )</code></pre>
-</details>
-</dd>
-<dt id="ieat.models.EmbeddingExtractor.make_param_path"><code class="name flex">
-<span>def <span class="ident">make_param_path</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def make_param_path(self):
+        &#34;&#34;&#34;
+        Loads the model, from the web or from the filesystem.
+        &#34;&#34;&#34;
         raise NotImplementedError</code></pre>
 </details>
 </dd>
@@ -840,12 +1138,39 @@ def visualize(images, paths):
 <span>def <span class="ident">process_samples</span></span>(<span>self, image_paths, visualize=False)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Pre-process the image samples for embedding extraction.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>image_paths</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>list of image paths to pre-process</dd>
+<dt><strong><code>visualize</code></strong> :&ensp;<code>bool</code></dt>
+<dd>whether to display the images after pre-processing</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>list of processed images, usually as <code>list[np.ndarray]</code></dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process_samples(self, image_paths, visualize=False):
+        &#34;&#34;&#34;
+        Pre-process the image samples for embedding extraction.
+
+        Parameters
+        ----------
+        image_paths : list[str]
+                list of image paths to pre-process
+        visualize : bool
+                whether to display the images after pre-processing
+
+        Returns
+        -------
+        list
+                list of processed images, usually as `list[np.ndarray]`
+        &#34;&#34;&#34;
         raise NotImplementedError</code></pre>
 </details>
 </dd>
@@ -853,18 +1178,52 @@ def visualize(images, paths):
 </dd>
 <dt id="ieat.models.GPTExtractor"><code class="flex name class">
 <span>class <span class="ident">GPTExtractor</span></span>
-<span>(</span><span>model_name, model_size, models_dir, color_clusters_dir, n_px, from_cache=True)</span>
+<span>(</span><span>model_name, model_size, models_dir, color_clusters_dir, n_px, **parent_params)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Extractor using <a href="https://github.com/openai/image-gpt">iGPT</a>. You must download the model manually.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>A name for this model, used for caching.</dd>
+<dt><strong><code>model_size</code></strong> :&ensp;<code>str</code></dt>
+<dd>The size of iGPT used - "s" for small, "m" for medium, or "l" for large. The exact parameters are stored in
+<code><a title="ieat.models.GPTExtractor.MODELS" href="#ieat.models.GPTExtractor.MODELS">GPTExtractor.MODELS</a></code>.</dd>
+<dt><strong><code>models_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to directory with downloaded model. Make sure the params match the downloaded model.</dd>
+<dt><strong><code>color_clusters_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to directory with the downloaded color clusters.</dd>
+<dt><strong><code>n_px</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of pixels used. All publicly available versions of iGPT are 32x32.</dd>
+<dt><strong><code>parent_params</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class GPTExtractor(EmbeddingExtractor):
+        &#34;&#34;&#34;Extractor using [iGPT](https://github.com/openai/image-gpt). You must download the model manually.&#34;&#34;&#34;
         MODELS = {&#34;l&#34;: (1536, 16, 48), &#34;m&#34;: (1024, 8, 36), &#34;s&#34;: (512, 8, 24)}
 
-        def __init__(self, model_name, model_size, models_dir, color_clusters_dir, n_px, from_cache=True):
+        def __init__(self, model_name, model_size, models_dir, color_clusters_dir, n_px, **parent_params):
+                &#34;&#34;&#34;
+
+                Parameters
+                ----------
+                model_name : str
+                        A name for this model, used for caching.
+                model_size : str
+                        The size of iGPT used - &#34;s&#34; for small, &#34;m&#34; for medium, or &#34;l&#34; for large. The exact parameters are stored in
+                        `GPTExtractor.MODELS`.
+                models_dir : str
+                        Path to directory with downloaded model. Make sure the params match the downloaded model.
+                color_clusters_dir : str
+                        Path to directory with the downloaded color clusters.
+                n_px : int
+                        The number of pixels used. All publicly available versions of iGPT are 32x32.
+                parent_params
+                &#34;&#34;&#34;
                 super().__init__(model_name, from_cache)
 
                 self.n_px = n_px
@@ -917,13 +1276,28 @@ def visualize(images, paths):
                 # print(&#34;Shape of samples: &#34;, samples.shape)
                 return samples
 
-        def make_param_path(self):
+        def _make_param_path(self):
                 return &#34;{}_{}&#34;.format(
                         self.model_size,
                         self.n_px
                 )
 
         def model_output(self, samples, gpu):
+                &#34;&#34;&#34;
+                Model output from every layer for a given input image.
+                Embeddings can be extracted and aggregated from different layers (see the child classes).
+
+                Parameters
+                ----------
+                samples : np.ndarray
+                gpu : bool
+                        whether to use GPU (True) or CPU (False)
+
+                Returns
+                -------
+                output : tuple(torch.FloatTensor)
+                        a Tensor of all hidden states
+                &#34;&#34;&#34;
                 context = np.concatenate(
                         (
                                 np.full((samples.shape[0], 1), self.vocab_size - 1),
@@ -954,48 +1328,44 @@ def visualize(images, paths):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="ieat.models.GPTExtractor.load_model"><code class="name flex">
-<span>def <span class="ident">load_model</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def load_model(self):
-        assert os.path.exists(self.model_path), f&#34;There is no file at {self.model_path}&#34;
-        self.model = ImageGPT2LMHeadModel.from_pretrained(
-                self.model_path, from_tf=True, config=self.config
-        )</code></pre>
-</details>
-</dd>
-<dt id="ieat.models.GPTExtractor.make_param_path"><code class="name flex">
-<span>def <span class="ident">make_param_path</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def make_param_path(self):
-        return &#34;{}_{}&#34;.format(
-                self.model_size,
-                self.n_px
-        )</code></pre>
-</details>
-</dd>
 <dt id="ieat.models.GPTExtractor.model_output"><code class="name flex">
 <span>def <span class="ident">model_output</span></span>(<span>self, samples, gpu)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Model output from every layer for a given input image.
+Embeddings can be extracted and aggregated from different layers (see the child classes).</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>samples</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>gpu</code></strong> :&ensp;<code>bool</code></dt>
+<dd>whether to use GPU (True) or CPU (False)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>output</code></strong> :&ensp;<code>tuple(torch.FloatTensor)</code></dt>
+<dd>a Tensor of all hidden states</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def model_output(self, samples, gpu):
+        &#34;&#34;&#34;
+        Model output from every layer for a given input image.
+        Embeddings can be extracted and aggregated from different layers (see the child classes).
+
+        Parameters
+        ----------
+        samples : np.ndarray
+        gpu : bool
+                whether to use GPU (True) or CPU (False)
+
+        Returns
+        -------
+        output : tuple(torch.FloatTensor)
+                a Tensor of all hidden states
+        &#34;&#34;&#34;
         context = np.concatenate(
                 (
                         np.full((samples.shape[0], 1), self.vocab_size - 1),
@@ -1008,58 +1378,37 @@ def visualize(images, paths):
         return self.model(context, output_hidden_states=True, return_dict=True)</code></pre>
 </details>
 </dd>
-<dt id="ieat.models.GPTExtractor.process_samples"><code class="name flex">
-<span>def <span class="ident">process_samples</span></span>(<span>self, image_paths, visualize=False)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def process_samples(self, image_paths, visualize=False):
-        for path in image_paths:
-                assert os.path.exists(path), &#34;ERR: %s is not a valid path.&#34; % path
-        # print(&#34;Num paths: %s&#34; % len(image_paths))
-        x = resize(self.n_px, image_paths)
-        # print(&#34;X shape: &#34;, x.shape)
-        x_norm = normalize_img(x)  # normalize pixels values to -1 to +1
-        samples = color_quantize_np(x_norm, self.clusters).reshape(
-                x_norm.shape[:-1])  # map pixels to closest color cluster
-
-        if visualize:
-                samples_img = [
-                        np.reshape(
-                                np.rint(127.5 * (self.clusters[s] + 1.0)), [self.n_px, self.n_px, 3]
-                        ).astype(np.uint8) for s in samples
-                ]  # convert color clusters back to pixels
-                self.visualize(samples_img, image_paths)
-        # print(&#34;Shape of samples: &#34;, samples.shape)
-        return samples</code></pre>
-</details>
-</dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ieat.models.EmbeddingExtractor" href="#ieat.models.EmbeddingExtractor">EmbeddingExtractor</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ieat.models.EmbeddingExtractor.extract" href="#ieat.models.EmbeddingExtractor.extract">extract</a></code></li>
+<li><code><a title="ieat.models.EmbeddingExtractor.extract_dir" href="#ieat.models.EmbeddingExtractor.extract_dir">extract_dir</a></code></li>
+<li><code><a title="ieat.models.EmbeddingExtractor.load_model" href="#ieat.models.EmbeddingExtractor.load_model">load_model</a></code></li>
+<li><code><a title="ieat.models.EmbeddingExtractor.process_samples" href="#ieat.models.EmbeddingExtractor.process_samples">process_samples</a></code></li>
+<li><code><a title="ieat.models.EmbeddingExtractor.visualize" href="#ieat.models.EmbeddingExtractor.visualize">visualize</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="ieat.models.ImageGPT2LMHeadModel"><code class="flex name class">
 <span>class <span class="ident">ImageGPT2LMHeadModel</span></span>
 <span>(</span><span>config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>The GPT2 Model transformer with a language modeling head on top
-(linear layer with weights tied to the input embeddings). </p>
-<p>This model is a PyTorch <code>torch.nn.Module &lt;https://pytorch.org/docs/stable/nn.html#torch.nn.Module&gt;</code>_ sub-class.
-Use it as a regular PyTorch Module and refer to the PyTorch documentation for all matter related to general
-usage and behavior.</p>
-<h2 id="parameters">Parameters</h2>
-<p>config (:class:<code>~transformers.GPT2Config</code>): Model configuration class with all the parameters of the model.
-Initializing with a config file does not load the weights associated with the model, only the configuration.
-Check out the :meth:<code>~transformers.PreTrainedModel.from_pretrained</code> method to load the model weights.</p>
+<div class="desc"><p>Extension of the HuggingFace <code>GPT2LMHeadModel</code> for iGPT.
+From <a href="https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb">apeguero1</a>.</p>
 <p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ImageGPT2LMHeadModel(GPT2LMHeadModel):
+        &#34;&#34;&#34;
+        Extension of the HuggingFace `GPT2LMHeadModel` for iGPT.
+        From [apeguero1](https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb).
+        &#34;&#34;&#34;
         load_tf_weights = load_tf_weights_in_image_gpt2
 
         def __init__(self, config):
@@ -1308,14 +1657,16 @@ def forward(
 <span>def <span class="ident">load_tf_weights</span></span>(<span>model, config, gpt2_checkpoint_path)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Load tf checkpoints in a pytorch model</p></div>
+<div class="desc"><p>Load tf checkpoints in a custom pytorch model.
+From <a href="https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb">apeguero1</a>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def load_tf_weights_in_image_gpt2(model, config, gpt2_checkpoint_path):
         &#34;&#34;&#34;
-        Load tf checkpoints in a pytorch model
+        Load tf checkpoints in a custom pytorch model.
+        From [apeguero1](https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb).
         &#34;&#34;&#34;
         try:
                 import re
@@ -1438,15 +1789,32 @@ the weights instead.</p></div>
 </dd>
 <dt id="ieat.models.LogitExtractor"><code class="flex name class">
 <span>class <span class="ident">LogitExtractor</span></span>
-<span>(</span><span>model_name, model_size, models_dir, color_clusters_dir, n_px, from_cache=True)</span>
+<span>(</span><span>model_name, model_size, models_dir, color_clusters_dir, n_px, **parent_params)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Extractor for iGPT logit (projection head) layer.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>A name for this model, used for caching.</dd>
+<dt><strong><code>model_size</code></strong> :&ensp;<code>str</code></dt>
+<dd>The size of iGPT used - "s" for small, "m" for medium, or "l" for large. The exact parameters are stored in
+<code><a title="ieat.models.GPTExtractor.MODELS" href="#ieat.models.GPTExtractor.MODELS">GPTExtractor.MODELS</a></code>.</dd>
+<dt><strong><code>models_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to directory with downloaded model. Make sure the params match the downloaded model.</dd>
+<dt><strong><code>color_clusters_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to directory with the downloaded color clusters.</dd>
+<dt><strong><code>n_px</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of pixels used. All publicly available versions of iGPT are 32x32.</dd>
+<dt><strong><code>parent_params</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class LogitExtractor(GPTExtractor):
+        &#34;&#34;&#34;Extractor for iGPT logit (projection head) layer.&#34;&#34;&#34;
         def _extract_context(self, samples, gpu, **extract_kwargs) -&gt; np.ndarray:
                 output = self.model_output(samples, gpu)
                 # just use the logit layer
@@ -1460,24 +1828,53 @@ the weights instead.</p></div>
 <li><a title="ieat.models.GPTExtractor" href="#ieat.models.GPTExtractor">GPTExtractor</a></li>
 <li><a title="ieat.models.EmbeddingExtractor" href="#ieat.models.EmbeddingExtractor">EmbeddingExtractor</a></li>
 </ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ieat.models.GPTExtractor" href="#ieat.models.GPTExtractor">GPTExtractor</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ieat.models.GPTExtractor.extract" href="#ieat.models.EmbeddingExtractor.extract">extract</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.extract_dir" href="#ieat.models.EmbeddingExtractor.extract_dir">extract_dir</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.load_model" href="#ieat.models.EmbeddingExtractor.load_model">load_model</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.model_output" href="#ieat.models.GPTExtractor.model_output">model_output</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.process_samples" href="#ieat.models.EmbeddingExtractor.process_samples">process_samples</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.visualize" href="#ieat.models.EmbeddingExtractor.visualize">visualize</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="ieat.models.OpenAIExtractor"><code class="flex name class">
 <span>class <span class="ident">OpenAIExtractor</span></span>
-<span>(</span><span>model_name, model_size, models_dir, color_clusters_dir, n_px, from_cache=True)</span>
+<span>(</span><span>model_name, model_size, models_dir, color_clusters_dir, n_px, **parent_params)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>OpenAI strategy:
+<div class="desc"><p>Pooled extraction method, used by the iGPT authors for linear evaluation.
 1. find $n^l = layer_norm(h^l)$
 2. average pool across the sequence dimension:
 $$ f^l = \langle n^l_i
-angle_i $$</p></div>
+angle_i $$</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>A name for this model, used for caching.</dd>
+<dt><strong><code>model_size</code></strong> :&ensp;<code>str</code></dt>
+<dd>The size of iGPT used - "s" for small, "m" for medium, or "l" for large. The exact parameters are stored in
+<code><a title="ieat.models.GPTExtractor.MODELS" href="#ieat.models.GPTExtractor.MODELS">GPTExtractor.MODELS</a></code>.</dd>
+<dt><strong><code>models_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to directory with downloaded model. Make sure the params match the downloaded model.</dd>
+<dt><strong><code>color_clusters_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to directory with the downloaded color clusters.</dd>
+<dt><strong><code>n_px</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of pixels used. All publicly available versions of iGPT are 32x32.</dd>
+<dt><strong><code>parent_params</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class OpenAIExtractor(GPTExtractor):
         &#34;&#34;&#34;
-        OpenAI strategy:
+        Pooled extraction method, used by the iGPT authors for linear evaluation.
         1. find $n^l = layer\_norm(h^l)$
         2. average pool across the sequence dimension:
         $$ f^l = \langle n^l_i \rangle_i $$
@@ -1499,18 +1896,48 @@ angle_i $$</p></div>
 <li><a title="ieat.models.GPTExtractor" href="#ieat.models.GPTExtractor">GPTExtractor</a></li>
 <li><a title="ieat.models.EmbeddingExtractor" href="#ieat.models.EmbeddingExtractor">EmbeddingExtractor</a></li>
 </ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ieat.models.GPTExtractor" href="#ieat.models.GPTExtractor">GPTExtractor</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ieat.models.GPTExtractor.extract" href="#ieat.models.EmbeddingExtractor.extract">extract</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.extract_dir" href="#ieat.models.EmbeddingExtractor.extract_dir">extract_dir</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.load_model" href="#ieat.models.EmbeddingExtractor.load_model">load_model</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.model_output" href="#ieat.models.GPTExtractor.model_output">model_output</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.process_samples" href="#ieat.models.EmbeddingExtractor.process_samples">process_samples</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.visualize" href="#ieat.models.EmbeddingExtractor.visualize">visualize</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="ieat.models.SENTExtractor"><code class="flex name class">
 <span>class <span class="ident">SENTExtractor</span></span>
-<span>(</span><span>model_name, model_size, models_dir, color_clusters_dir, n_px, from_cache=True)</span>
+<span>(</span><span>model_name, model_size, models_dir, color_clusters_dir, n_px, **parent_params)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Extractor for last position of the last layer output.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>A name for this model, used for caching.</dd>
+<dt><strong><code>model_size</code></strong> :&ensp;<code>str</code></dt>
+<dd>The size of iGPT used - "s" for small, "m" for medium, or "l" for large. The exact parameters are stored in
+<code><a title="ieat.models.GPTExtractor.MODELS" href="#ieat.models.GPTExtractor.MODELS">GPTExtractor.MODELS</a></code>.</dd>
+<dt><strong><code>models_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to directory with downloaded model. Make sure the params match the downloaded model.</dd>
+<dt><strong><code>color_clusters_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to directory with the downloaded color clusters.</dd>
+<dt><strong><code>n_px</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of pixels used. All publicly available versions of iGPT are 32x32.</dd>
+<dt><strong><code>parent_params</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class SENTExtractor(GPTExtractor):
+        &#34;&#34;&#34;Extractor for last position of the last layer output.&#34;&#34;&#34;
         def _extract_context(self, samples, gpu, **extract_kwargs)  -&gt; np.ndarray:
                 &#34;&#34;&#34;
                 SENT uses the last hidden layer output.
@@ -1529,22 +1956,62 @@ angle_i $$</p></div>
 <li><a title="ieat.models.GPTExtractor" href="#ieat.models.GPTExtractor">GPTExtractor</a></li>
 <li><a title="ieat.models.EmbeddingExtractor" href="#ieat.models.EmbeddingExtractor">EmbeddingExtractor</a></li>
 </ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ieat.models.GPTExtractor" href="#ieat.models.GPTExtractor">GPTExtractor</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ieat.models.GPTExtractor.extract" href="#ieat.models.EmbeddingExtractor.extract">extract</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.extract_dir" href="#ieat.models.EmbeddingExtractor.extract_dir">extract_dir</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.load_model" href="#ieat.models.EmbeddingExtractor.load_model">load_model</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.model_output" href="#ieat.models.GPTExtractor.model_output">model_output</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.process_samples" href="#ieat.models.EmbeddingExtractor.process_samples">process_samples</a></code></li>
+<li><code><a title="ieat.models.GPTExtractor.visualize" href="#ieat.models.EmbeddingExtractor.visualize">visualize</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="ieat.models.SimCLRExtractor"><code class="flex name class">
 <span>class <span class="ident">SimCLRExtractor</span></span>
-<span>(</span><span>model_name: str, depth: int, width: int, sk: int, from_cache=True)</span>
+<span>(</span><span>model_name: str, depth: int, width: int, sk: int, **parent_params)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Extractor using the <a href="https://github.com/google-research/simclr">SimCLR model</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>A name for this model, used for caching.</dd>
+<dt><strong><code>depth</code></strong> :&ensp;<code>int</code></dt>
+<dd>Depth of the ResNet used.</dd>
+<dt><strong><code>width</code></strong> :&ensp;<code>int</code></dt>
+<dd>Width of the resnet used.</dd>
+<dt><strong><code>sk</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to use selective kernels.</dd>
+<dt><strong><code>parent_params</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class SimCLRExtractor(EmbeddingExtractor):
+        &#34;&#34;&#34;Extractor using the [SimCLR model](https://github.com/google-research/simclr).&#34;&#34;&#34;
         n_px = 224
 
-        def __init__(self, model_name: str, depth: int, width: int, sk: int, from_cache=True):
-                super().__init__(model_name, from_cache)
+        def __init__(self, model_name: str, depth: int, width: int, sk: int, **parent_params):
+                &#34;&#34;&#34;
+                Parameters
+                ----------
+                model_name : str
+                        A name for this model, used for caching.
+                depth : int
+                        Depth of the ResNet used.
+                width : int
+                        Width of the resnet used.
+                sk : bool
+                        Whether to use selective kernels.
+                parent_params
+                &#34;&#34;&#34;
+                super().__init__(model_name, **parent_params)
                 tf.compat.v1.disable_eager_execution()
                 self.depth = depth
                 self.width = width
@@ -1574,7 +2041,7 @@ angle_i $$</p></div>
                 encs = output[&#39;default&#39;]
                 return encs
 
-        def make_param_path(self):
+        def _make_param_path(self):
                 return f&#34;{self.depth}_{self.width}x_sk{self.sk}&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1588,89 +2055,36 @@ angle_i $$</p></div>
 <div class="desc"></div>
 </dd>
 </dl>
-<h3>Methods</h3>
-<dl>
-<dt id="ieat.models.SimCLRExtractor.load_model"><code class="name flex">
-<span>def <span class="ident">load_model</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def load_model(self):
-        hub_path = f&#34;gs://simclr-checkpoints/simclrv2/pretrained/r{self.depth}_{self.width}x_sk{self.sk}/hub&#34;
-        module = hub.Module(hub_path, trainable=False)
-        self.images = tf.compat.v1.placeholder(tf.float32)
-        self.model = module(inputs=self.images, signature=&#34;default&#34;, as_dict=True)
-        self.sess = tf.compat.v1.Session()
-        self.sess.run(tf.compat.v1.global_variables_initializer())</code></pre>
-</details>
-</dd>
-<dt id="ieat.models.SimCLRExtractor.make_param_path"><code class="name flex">
-<span>def <span class="ident">make_param_path</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def make_param_path(self):
-        return f&#34;{self.depth}_{self.width}x_sk{self.sk}&#34;</code></pre>
-</details>
-</dd>
-<dt id="ieat.models.SimCLRExtractor.process_samples"><code class="name flex">
-<span>def <span class="ident">process_samples</span></span>(<span>self, image_paths: list, visualize=False)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def process_samples(self, image_paths: list, visualize=False):
-        images = np.array([image/255 for image in resize(SimCLRExtractor.n_px, image_paths)])
-
-        if visualize:
-                self.visualize(images, image_paths)
-
-        return images</code></pre>
-</details>
-</dd>
-</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ieat.models.EmbeddingExtractor" href="#ieat.models.EmbeddingExtractor">EmbeddingExtractor</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ieat.models.EmbeddingExtractor.extract" href="#ieat.models.EmbeddingExtractor.extract">extract</a></code></li>
+<li><code><a title="ieat.models.EmbeddingExtractor.extract_dir" href="#ieat.models.EmbeddingExtractor.extract_dir">extract_dir</a></code></li>
+<li><code><a title="ieat.models.EmbeddingExtractor.load_model" href="#ieat.models.EmbeddingExtractor.load_model">load_model</a></code></li>
+<li><code><a title="ieat.models.EmbeddingExtractor.process_samples" href="#ieat.models.EmbeddingExtractor.process_samples">process_samples</a></code></li>
+<li><code><a title="ieat.models.EmbeddingExtractor.visualize" href="#ieat.models.EmbeddingExtractor.visualize">visualize</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="ieat.models.ln_mod"><code class="flex name class">
 <span>class <span class="ident">ln_mod</span></span>
 <span>(</span><span>nx, eps=1e-05)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Base class for all neural network modules.</p>
-<p>Your models should also subclass this class.</p>
-<p>Modules can also contain other Modules, allowing to nest them in
-a tree structure. You can assign the submodules as regular attributes::</p>
-<pre><code>import torch.nn as nn
-import torch.nn.functional as F
-
-class Model(nn.Module):
-    def __init__(self):
-        super(Model, self).__init__()
-        self.conv1 = nn.Conv2d(1, 20, 5)
-        self.conv2 = nn.Conv2d(20, 20, 5)
-
-    def forward(self, x):
-        x = F.relu(self.conv1(x))
-        return F.relu(self.conv2(x))
-</code></pre>
-<p>Submodules assigned in this way will be registered, and will have their
-parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="desc"><p>Torch module for the iGPT modified linear head.
+From <a href="https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb">apeguero1</a>.</p>
 <p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ln_mod(nn.Module):
+        &#34;&#34;&#34;
+        Torch module for the iGPT modified linear head.
+        From [apeguero1](https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb).
+        &#34;&#34;&#34;
         def __init__(self, nx, eps=1e-5):
                 super().__init__()
                 self.eps = eps
@@ -1739,12 +2153,10 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 <ul>
 <li>
 <h4><code><a title="ieat.models.EmbeddingExtractor" href="#ieat.models.EmbeddingExtractor">EmbeddingExtractor</a></code></h4>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="ieat.models.EmbeddingExtractor.extract" href="#ieat.models.EmbeddingExtractor.extract">extract</a></code></li>
 <li><code><a title="ieat.models.EmbeddingExtractor.extract_dir" href="#ieat.models.EmbeddingExtractor.extract_dir">extract_dir</a></code></li>
 <li><code><a title="ieat.models.EmbeddingExtractor.load_model" href="#ieat.models.EmbeddingExtractor.load_model">load_model</a></code></li>
-<li><code><a title="ieat.models.EmbeddingExtractor.make_embedding_path" href="#ieat.models.EmbeddingExtractor.make_embedding_path">make_embedding_path</a></code></li>
-<li><code><a title="ieat.models.EmbeddingExtractor.make_param_path" href="#ieat.models.EmbeddingExtractor.make_param_path">make_param_path</a></code></li>
 <li><code><a title="ieat.models.EmbeddingExtractor.process_samples" href="#ieat.models.EmbeddingExtractor.process_samples">process_samples</a></code></li>
 <li><code><a title="ieat.models.EmbeddingExtractor.visualize" href="#ieat.models.EmbeddingExtractor.visualize">visualize</a></code></li>
 </ul>
@@ -1753,10 +2165,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 <h4><code><a title="ieat.models.GPTExtractor" href="#ieat.models.GPTExtractor">GPTExtractor</a></code></h4>
 <ul class="">
 <li><code><a title="ieat.models.GPTExtractor.MODELS" href="#ieat.models.GPTExtractor.MODELS">MODELS</a></code></li>
-<li><code><a title="ieat.models.GPTExtractor.load_model" href="#ieat.models.GPTExtractor.load_model">load_model</a></code></li>
-<li><code><a title="ieat.models.GPTExtractor.make_param_path" href="#ieat.models.GPTExtractor.make_param_path">make_param_path</a></code></li>
 <li><code><a title="ieat.models.GPTExtractor.model_output" href="#ieat.models.GPTExtractor.model_output">model_output</a></code></li>
-<li><code><a title="ieat.models.GPTExtractor.process_samples" href="#ieat.models.GPTExtractor.process_samples">process_samples</a></code></li>
 </ul>
 </li>
 <li>
@@ -1782,10 +2191,7 @@ parameters converted too when you call :meth:<code>to</code>, etc.</p>
 <li>
 <h4><code><a title="ieat.models.SimCLRExtractor" href="#ieat.models.SimCLRExtractor">SimCLRExtractor</a></code></h4>
 <ul class="">
-<li><code><a title="ieat.models.SimCLRExtractor.load_model" href="#ieat.models.SimCLRExtractor.load_model">load_model</a></code></li>
-<li><code><a title="ieat.models.SimCLRExtractor.make_param_path" href="#ieat.models.SimCLRExtractor.make_param_path">make_param_path</a></code></li>
 <li><code><a title="ieat.models.SimCLRExtractor.n_px" href="#ieat.models.SimCLRExtractor.n_px">n_px</a></code></li>
-<li><code><a title="ieat.models.SimCLRExtractor.process_samples" href="#ieat.models.SimCLRExtractor.process_samples">process_samples</a></code></li>
 </ul>
 </li>
 <li>

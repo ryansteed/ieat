@@ -39,9 +39,9 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 progress_level = 25
 logging.addLevelName(progress_level, &#34;PROGRESS&#34;)
-def progress(self, message, *args, **kws):
+def _progress(self, message, *args, **kws):
         self._log(progress_level, message, args, **kws)
-logging.Logger.progress = progress
+logging.Logger.progress = _progress
 
 
 def test(
@@ -57,16 +57,41 @@ def test(
         **test_params
 ):
         &#34;&#34;&#34;
-        :param X: a directory of target images
-        :param Y: a directory of target images
-        :param A: a directory of attribute images
-        :param B: a directory of attribute images
-        :param model_type: key name of model
-        :param model_params: Model-specific initialization parameters
-        :param file_types: acceptable image file types
-        :param from_cache: whether to use cached embeddings at the location `embedding_path`
-        :param verbose: whether to print out images, other detailed logging info
-        :return: the test effect size and p-value
+        Parameters
+        ----------
+        X : str
+                a directory of target images
+        Y : str
+                a directory of target images
+        A : str
+                a directory of attribute images
+        B : str
+                a directory of attribute images
+        model_type : str
+                key name of model
+        model_params : dict
+                Model-specific initialization parameters
+        file_types : list[str]
+                acceptable image file types
+        from_cache : bool
+                whether to use cached embeddings at the location `embedding_path`
+        verbose : bool
+                whether to print out images, other detailed logging info
+        gpu : bool
+                whether to use GPU (True) or CPU (False)
+        batch_size : int
+                batch size of processing - helps when you have limited memory
+        model : str
+                name of the model being tested - used for caching
+        test_params : dict
+                additional test params
+
+        Returns
+        -------
+        d : float
+                the test effect size
+        p : float
+                the p-value
         &#34;&#34;&#34;
 
         input_dirs = [X, Y, A, B]
@@ -103,15 +128,25 @@ def test_all(
                 **test_params
         ):
         &#34;&#34;&#34;
-        Produce a table of model_type x test results.
-        :param model_types: mapping of model type keyword to parameters for that model
-        :param clusters_dir: directory of iGPT color cluster files
-        :param n_px: number of pixels in the input images
-        :param test_params: Extra params for the `test` method
-        :param tests: Optional list of tests to run, by name - see `tests_all`
-        :return: the test effect size and p-value
-        :return:
+        Produces a table of model_type x test results.
+        Parameters
+        ----------
+        model_types : dict[str, dict]
+                mapping of model type keyword to parameters for that model
+        tests : list[str]
+                Optional list of tests to run, by name - see source code for the keys
+        from_cache : bool
+                Whether to use the cache
+        test_params : dict
+                additional test params
+
+        Returns
+        -------
+        results : dict[tuple, tuple]
+                results of the tests, mapped by model and test -&gt; categories used, effect size, p value, target sample size,
+                and attribute sample size
         &#34;&#34;&#34;
+
         TestData = namedtuple(&#39;TestData&#39;, [&#39;name&#39;, &#39;X&#39;, &#39;Y&#39;, &#39;A&#39;, &#39;B&#39;])
         tests_all = [
                 # Baseline
@@ -321,33 +356,46 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="ieat.api.progress"><code class="name flex">
-<span>def <span class="ident">progress</span></span>(<span>self, message, *args, **kws)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def progress(self, message, *args, **kws):
-        self._log(progress_level, message, args, **kws)</code></pre>
-</details>
-</dd>
 <dt id="ieat.api.test"><code class="name flex">
 <span>def <span class="ident">test</span></span>(<span>X, Y, A, B, model_type: str, model_params: list, file_types=('.jpg', '.jpeg', '.png', '.webp'), from_cache=True, verbose=False, gpu=False, batch_size=20, model=None, **test_params)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>:param X: a directory of target images
-:param Y: a directory of target images
-:param A: a directory of attribute images
-:param B: a directory of attribute images
-:param model_type: key name of model
-:param model_params: Model-specific initialization parameters
-:param file_types: acceptable image file types
-:param from_cache: whether to use cached embeddings at the location <code>embedding_path</code>
-:param verbose: whether to print out images, other detailed logging info
-:return: the test effect size and p-value</p></div>
+<div class="desc"><h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>X</code></strong> :&ensp;<code>str</code></dt>
+<dd>a directory of target images</dd>
+<dt><strong><code>Y</code></strong> :&ensp;<code>str</code></dt>
+<dd>a directory of target images</dd>
+<dt><strong><code>A</code></strong> :&ensp;<code>str</code></dt>
+<dd>a directory of attribute images</dd>
+<dt><strong><code>B</code></strong> :&ensp;<code>str</code></dt>
+<dd>a directory of attribute images</dd>
+<dt><strong><code>model_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>key name of model</dd>
+<dt><strong><code>model_params</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Model-specific initialization parameters</dd>
+<dt><strong><code>file_types</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>acceptable image file types</dd>
+<dt><strong><code>from_cache</code></strong> :&ensp;<code>bool</code></dt>
+<dd>whether to use cached embeddings at the location <code>embedding_path</code></dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool</code></dt>
+<dd>whether to print out images, other detailed logging info</dd>
+<dt><strong><code>gpu</code></strong> :&ensp;<code>bool</code></dt>
+<dd>whether to use GPU (True) or CPU (False)</dd>
+<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>batch size of processing - helps when you have limited memory</dd>
+<dt><strong><code>model</code></strong> :&ensp;<code>str</code></dt>
+<dd>name of the model being tested - used for caching</dd>
+<dt><strong><code>test_params</code></strong> :&ensp;<code>dict</code></dt>
+<dd>additional test params</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>d</code></strong> :&ensp;<code>float</code></dt>
+<dd>the test effect size</dd>
+<dt><strong><code>p</code></strong> :&ensp;<code>float</code></dt>
+<dd>the p-value</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -365,16 +413,41 @@ if __name__ == &#34;__main__&#34;:
         **test_params
 ):
         &#34;&#34;&#34;
-        :param X: a directory of target images
-        :param Y: a directory of target images
-        :param A: a directory of attribute images
-        :param B: a directory of attribute images
-        :param model_type: key name of model
-        :param model_params: Model-specific initialization parameters
-        :param file_types: acceptable image file types
-        :param from_cache: whether to use cached embeddings at the location `embedding_path`
-        :param verbose: whether to print out images, other detailed logging info
-        :return: the test effect size and p-value
+        Parameters
+        ----------
+        X : str
+                a directory of target images
+        Y : str
+                a directory of target images
+        A : str
+                a directory of attribute images
+        B : str
+                a directory of attribute images
+        model_type : str
+                key name of model
+        model_params : dict
+                Model-specific initialization parameters
+        file_types : list[str]
+                acceptable image file types
+        from_cache : bool
+                whether to use cached embeddings at the location `embedding_path`
+        verbose : bool
+                whether to print out images, other detailed logging info
+        gpu : bool
+                whether to use GPU (True) or CPU (False)
+        batch_size : int
+                batch size of processing - helps when you have limited memory
+        model : str
+                name of the model being tested - used for caching
+        test_params : dict
+                additional test params
+
+        Returns
+        -------
+        d : float
+                the test effect size
+        p : float
+                the p-value
         &#34;&#34;&#34;
 
         input_dirs = [X, Y, A, B]
@@ -408,14 +481,25 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">test_all</span></span>(<span>model_types: dict, tests: list = None, from_cache=True, **test_params)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Produce a table of model_type x test results.
-:param model_types: mapping of model type keyword to parameters for that model
-:param clusters_dir: directory of iGPT color cluster files
-:param n_px: number of pixels in the input images
-:param test_params: Extra params for the <code><a title="ieat.api.test" href="#ieat.api.test">test()</a></code> method
-:param tests: Optional list of tests to run, by name - see <code>tests_all</code>
-:return: the test effect size and p-value
-:return:</p></div>
+<div class="desc"><p>Produces a table of model_type x test results.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>model_types</code></strong> :&ensp;<code>dict[str, dict]</code></dt>
+<dd>mapping of model type keyword to parameters for that model</dd>
+<dt><strong><code>tests</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>Optional list of tests to run, by name - see source code for the keys</dd>
+<dt><strong><code>from_cache</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to use the cache</dd>
+<dt><strong><code>test_params</code></strong> :&ensp;<code>dict</code></dt>
+<dd>additional test params</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>results</code></strong> :&ensp;<code>dict[tuple, tuple]</code></dt>
+<dd>results of the tests, mapped by model and test -&gt; categories used, effect size, p value, target sample size,
+and attribute sample size</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -427,15 +511,25 @@ if __name__ == &#34;__main__&#34;:
                 **test_params
         ):
         &#34;&#34;&#34;
-        Produce a table of model_type x test results.
-        :param model_types: mapping of model type keyword to parameters for that model
-        :param clusters_dir: directory of iGPT color cluster files
-        :param n_px: number of pixels in the input images
-        :param test_params: Extra params for the `test` method
-        :param tests: Optional list of tests to run, by name - see `tests_all`
-        :return: the test effect size and p-value
-        :return:
+        Produces a table of model_type x test results.
+        Parameters
+        ----------
+        model_types : dict[str, dict]
+                mapping of model type keyword to parameters for that model
+        tests : list[str]
+                Optional list of tests to run, by name - see source code for the keys
+        from_cache : bool
+                Whether to use the cache
+        test_params : dict
+                additional test params
+
+        Returns
+        -------
+        results : dict[tuple, tuple]
+                results of the tests, mapped by model and test -&gt; categories used, effect size, p value, target sample size,
+                and attribute sample size
         &#34;&#34;&#34;
+
         TestData = namedtuple(&#39;TestData&#39;, [&#39;name&#39;, &#39;X&#39;, &#39;Y&#39;, &#39;A&#39;, &#39;B&#39;])
         tests_all = [
                 # Baseline
@@ -593,7 +687,6 @@ if __name__ == &#34;__main__&#34;:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="ieat.api.progress" href="#ieat.api.progress">progress</a></code></li>
 <li><code><a title="ieat.api.test" href="#ieat.api.test">test</a></code></li>
 <li><code><a title="ieat.api.test_all" href="#ieat.api.test_all">test_all</a></code></li>
 </ul>
