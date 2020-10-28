@@ -11,9 +11,9 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 progress_level = 25
 logging.addLevelName(progress_level, "PROGRESS")
-def progress(self, message, *args, **kws):
+def _progress(self, message, *args, **kws):
 	self._log(progress_level, message, args, **kws)
-logging.Logger.progress = progress
+logging.Logger.progress = _progress
 
 
 def test(
@@ -29,16 +29,41 @@ def test(
 	**test_params
 ):
 	"""
-	:param X: a directory of target images
-	:param Y: a directory of target images
-	:param A: a directory of attribute images
-	:param B: a directory of attribute images
-	:param model_type: key name of model
-	:param model_params: Model-specific initialization parameters
-	:param file_types: acceptable image file types
-	:param from_cache: whether to use cached embeddings at the location `embedding_path`
-	:param verbose: whether to print out images, other detailed logging info
-	:return: the test effect size and p-value
+	Parameters
+	----------
+	X : str
+		a directory of target images
+	Y : str
+		a directory of target images
+	A : str
+		a directory of attribute images
+	B : str
+		a directory of attribute images
+	model_type : str
+		key name of model
+	model_params : dict
+		Model-specific initialization parameters
+	file_types : list[str]
+		acceptable image file types
+	from_cache : bool
+		whether to use cached embeddings at the location `embedding_path`
+	verbose : bool
+		whether to print out images, other detailed logging info
+	gpu : bool
+		whether to use GPU (True) or CPU (False)
+	batch_size : int
+		batch size of processing - helps when you have limited memory
+	model : str
+		name of the model being tested - used for caching
+	test_params : dict
+		additional test params
+
+	Returns
+	-------
+	d : float
+		the test effect size
+	p : float
+		the p-value
 	"""
 
 	input_dirs = [X, Y, A, B]
@@ -75,15 +100,25 @@ def test_all(
 		**test_params
 	):
 	"""
-	Produce a table of model_type x test results.
-	:param model_types: mapping of model type keyword to parameters for that model
-	:param clusters_dir: directory of iGPT color cluster files
-	:param n_px: number of pixels in the input images
-	:param test_params: Extra params for the `test` method
-	:param tests: Optional list of tests to run, by name - see `tests_all`
-	:return: the test effect size and p-value
-	:return:
+	Produces a table of model_type x test results.
+	Parameters
+	----------
+	model_types : dict[str, dict]
+		mapping of model type keyword to parameters for that model
+	tests : list[str]
+		Optional list of tests to run, by name - see source code for the keys
+	from_cache : bool
+		Whether to use the cache
+	test_params : dict
+		additional test params
+
+	Returns
+	-------
+	results : dict[tuple, tuple]
+		results of the tests, mapped by model and test -> categories used, effect size, p value, target sample size,
+		and attribute sample size
 	"""
+
 	TestData = namedtuple('TestData', ['name', 'X', 'Y', 'A', 'B'])
 	tests_all = [
 		# Baseline

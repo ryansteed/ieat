@@ -20,21 +20,54 @@ import logging
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 logger = logging.getLogger()
 
-# # Code adapted from https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT
-# .ipynb # - thanks to the author
+# # Code adapted from
+# https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb
+# - thanks to the author
 
 
 class EmbeddingExtractor:
+	"""Extracts embeddings from images with a pre-trained model."""
 	def __init__(self, model_name, from_cache):
+		"""
+		Parameters
+		----------
+		model_name : str
+			A name for this model, used for caching.
+		from_cache : bool
+			Whether to used cached embeddings.
+		"""
 		self.from_cache = from_cache
 		self.model_name = model_name
 		self.model = None
 
 	def load_model(self):
+		"""
+		Loads the model, from the web or from the filesystem.
+		"""
 		raise NotImplementedError
 
 	def extract_dir(self, d, file_types=(".jpg", ".jpeg", ".png", ".webp"), batch_size=None, visualize=False, **extract_params):
-		embedding_path = self.make_embedding_path(d)
+		"""
+		Extracts embeddings from images in a directory.
+		Parameters
+		----------
+		d : str
+			path to a directory of images
+		file_types : list[str]
+			list of acceptable file extensions for images
+		batch_size : int
+			number of images processed at a time - helps when you have limited memory
+		visualize : bool
+			whether to display the images after pre-processing
+		extract_params : dict
+			additional parameters for extraction
+
+		Returns
+		-------
+		encs : pd.DataFrame
+			a Pandas dataframe of features - see `EmbeddingExtractor.extract`
+		"""
+		embedding_path = self._make_embedding_path(d)
 		image_paths = [
 			os.path.join(d, f) for f in os.listdir(d)
 			if os.path.splitext(f)[1] in file_types
@@ -59,6 +92,29 @@ class EmbeddingExtractor:
 		return encs
 
 	def extract(self, image_paths, batch_size=None, output_path=None, gpu=False, visualize=False, **extract_kwargs):
+		"""
+		Extracts features from a set of image paths.
+
+		Parameters
+		----------
+		image_paths : str
+			a list of paths to images to extract features for
+		batch_size : int or None
+			number of images processed at a time - helps when you have limited memory; if None, use just one batch
+		output_path : str or None
+			path to save a CSV cache file with the extracted features; if none, don't cache
+		gpu : bool
+			whether to use GPU (True) or CPU (False)
+		visualize : bool
+			whether to display the images after pre-processing
+		extract_kwargs : dict
+			additional parameters for extraction
+
+		Returns
+		-------
+		encs : pd.DataFrame
+			data frame of features, indexed by the original image path
+		"""
 		if self.model is None:
 			self.load_model()
 		if batch_size is None:
@@ -87,38 +143,76 @@ class EmbeddingExtractor:
 			return encs.set_index("img")
 
 	def process_samples(self, image_paths, visualize=False):
+		"""
+		Pre-process the image samples for embedding extraction.
+
+		Parameters
+		----------
+		image_paths : list[str]
+			list of image paths to pre-process
+		visualize : bool
+			whether to display the images after pre-processing
+
+		Returns
+		-------
+		list
+			list of processed images, usually as `list[np.ndarray]`
+		"""
 		raise NotImplementedError
 
 	def _extract_context(self, samples, gpu, **extract_kwargs) -> np.ndarray:
 		raise NotImplementedError
 
-	def make_embedding_path(self, d):
+	def _make_embedding_path(self, d):
 		return "embeddings/{}_{}_{}_{}.csv".format(
 			os.path.basename(os.path.dirname(d)),
 			os.path.basename(d),
 			self.model_name,
-			self.make_param_path()
+			self._make_param_path()
 		)
 
-	def make_param_path(self):
+	def _make_param_path(self):
 		raise NotImplementedError
 
 	@staticmethod
 	def visualize(images, paths):
+		"""
+		Visualize some preprocessed images.
+
+		Parameters
+		----------
+		images : list[np.ndarray]
+			the images, as matrices
+		paths : list[str]
+			list of the original image paths, so we can get the parent directory
+		"""
 		print(os.path.basename(os.path.dirname(paths[0])))
-		f, axes = plt.subplots(1, len(image_paths), dpi=300)
+		f, axes = plt.subplots(1, len(images), dpi=300)
 		for img, ax in zip(images, axes):
 			ax.axis('off')
 			ax.imshow(img)
 		plt.show()
 
 
-
 class SimCLRExtractor(EmbeddingExtractor):
+	"""Extractor using the [SimCLR model](https://github.com/google-research/simclr)."""
 	n_px = 224
 
-	def __init__(self, model_name: str, depth: int, width: int, sk: int, from_cache=True):
-		super().__init__(model_name, from_cache)
+	def __init__(self, model_name: str, depth: int, width: int, sk: int, **parent_params):
+		"""
+		Parameters
+		----------
+		model_name : str
+			A name for this model, used for caching.
+		depth : int
+			Depth of the ResNet used.
+		width : int
+			Width of the resnet used.
+		sk : bool
+			Whether to use selective kernels.
+		parent_params
+		"""
+		super().__init__(model_name, **parent_params)
 		tf.compat.v1.disable_eager_execution()
 		self.depth = depth
 		self.width = width
@@ -148,14 +242,32 @@ class SimCLRExtractor(EmbeddingExtractor):
 		encs = output['default']
 		return encs
 
-	def make_param_path(self):
+	def _make_param_path(self):
 		return f"{self.depth}_{self.width}x_sk{self.sk}"
 
 
 class GPTExtractor(EmbeddingExtractor):
+	"""Extractor using [iGPT](https://github.com/openai/image-gpt). You must download the model manually."""
 	MODELS = {"l": (1536, 16, 48), "m": (1024, 8, 36), "s": (512, 8, 24)}
 
-	def __init__(self, model_name, model_size, models_dir, color_clusters_dir, n_px, from_cache=True):
+	def __init__(self, model_name, model_size, models_dir, color_clusters_dir, n_px, **parent_params):
+		"""
+
+		Parameters
+		----------
+		model_name : str
+			A name for this model, used for caching.
+		model_size : str
+			The size of iGPT used - "s" for small, "m" for medium, or "l" for large. The exact parameters are stored in
+			`GPTExtractor.MODELS`.
+		models_dir : str
+			Path to directory with downloaded model. Make sure the params match the downloaded model.
+		color_clusters_dir : str
+			Path to directory with the downloaded color clusters.
+		n_px : int
+			The number of pixels used. All publicly available versions of iGPT are 32x32.
+		parent_params
+		"""
 		super().__init__(model_name, from_cache)
 
 		self.n_px = n_px
@@ -208,13 +320,28 @@ class GPTExtractor(EmbeddingExtractor):
 		# print("Shape of samples: ", samples.shape)
 		return samples
 
-	def make_param_path(self):
+	def _make_param_path(self):
 		return "{}_{}".format(
 			self.model_size,
 			self.n_px
 		)
 
 	def model_output(self, samples, gpu):
+		"""
+		Model output from every layer for a given input image.
+		Embeddings can be extracted and aggregated from different layers (see the child classes).
+
+		Parameters
+		----------
+		samples : np.ndarray
+		gpu : bool
+			whether to use GPU (True) or CPU (False)
+
+		Returns
+		-------
+		output : tuple(torch.FloatTensor)
+			a Tensor of all hidden states
+		"""
 		context = np.concatenate(
 			(
 				np.full((samples.shape[0], 1), self.vocab_size - 1),
@@ -228,6 +355,7 @@ class GPTExtractor(EmbeddingExtractor):
 
 
 class LogitExtractor(GPTExtractor):
+	"""Extractor for iGPT logit (projection head) layer."""
 	def _extract_context(self, samples, gpu, **extract_kwargs) -> np.ndarray:
 		output = self.model_output(samples, gpu)
 		# just use the logit layer
@@ -238,6 +366,7 @@ class LogitExtractor(GPTExtractor):
 
 
 class SENTExtractor(GPTExtractor):
+	"""Extractor for last position of the last layer output."""
 	def _extract_context(self, samples, gpu, **extract_kwargs)  -> np.ndarray:
 		"""
 		SENT uses the last hidden layer output.
@@ -254,7 +383,7 @@ class SENTExtractor(GPTExtractor):
 
 class OpenAIExtractor(GPTExtractor):
 	"""
-	OpenAI strategy:
+	Pooled extraction method, used by the iGPT authors for linear evaluation.
 	1. find $n^l = layer\_norm(h^l)$
 	2. average pool across the sequence dimension:
 	$$ f^l = \langle n^l_i \rangle_i $$
@@ -273,6 +402,10 @@ class OpenAIExtractor(GPTExtractor):
 
 
 class ln_mod(nn.Module):
+	"""
+	Torch module for the iGPT modified linear head.
+	From [apeguero1](https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb).
+	"""
 	def __init__(self, nx, eps=1e-5):
 		super().__init__()
 		self.eps = eps
@@ -286,7 +419,8 @@ class ln_mod(nn.Module):
 
 def load_tf_weights_in_image_gpt2(model, config, gpt2_checkpoint_path):
 	"""
-	Load tf checkpoints in a pytorch model
+	Load tf checkpoints in a custom pytorch model.
+	From [apeguero1](https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb).
 	"""
 	try:
 		import re
@@ -401,6 +535,10 @@ def replace_ln(m, name, config):
 
 
 class ImageGPT2LMHeadModel(GPT2LMHeadModel):
+	"""
+	Extension of the HuggingFace `GPT2LMHeadModel` for iGPT.
+	From [apeguero1](https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb).
+	"""
 	load_tf_weights = load_tf_weights_in_image_gpt2
 
 	def __init__(self, config):

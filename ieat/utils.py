@@ -1,13 +1,17 @@
-## Code adapted from https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb 
-## - thanks to the author
+# Some code adapted from
+# https://colab.research.google.com/github/apeguero1/image-gpt/blob/master/Transformers_Image_GPT.ipynb
+# - thanks to the author
 
-#Resize original images to n_px by n_px
 import cv2
 import numpy as np
 
-#numpy implementation of functions in image-gpt/src/utils which convert pixels of image to nearest color cluster. 
+# numpy implementation of functions in image-gpt/src/utils which convert pixels of image to nearest color cluster.
+# Resize original images to n_px by n_px
+
+
 def normalize_img(img):
 	return img/127.5 - 1
+
 
 def squared_euclidean_distance_np(a,b):
 	b = b.T
@@ -17,10 +21,12 @@ def squared_euclidean_distance_np(a,b):
 	d = a2[:,None] - 2*ab + b2[None,:]
 	return d
 
+
 def color_quantize_np(x, clusters):
 	x = x.reshape(-1, 3)
 	d = squared_euclidean_distance_np(x, clusters)
 	return np.argmin(d,axis=1)
+
 
 def resize(n_px, image_paths, rotate_90=False):
 	dim=(n_px,n_px)

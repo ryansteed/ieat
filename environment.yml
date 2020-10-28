@@ -1,4 +1,4 @@
-name: image-gpt-bias
+name: ieat
 channels:
   - conda-forge
   - anaconda-fusion
