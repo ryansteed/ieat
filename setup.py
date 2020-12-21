@@ -12,6 +12,7 @@ setup(
         'numpy',
         'matplotlib',
         'opencv-python',
-        'tensorflow'
+        'tensorflow',
+        'torchvision'
     ]
 )
