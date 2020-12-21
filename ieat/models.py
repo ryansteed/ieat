@@ -268,11 +268,10 @@ class GPTExtractor(EmbeddingExtractor):
 			The number of pixels used. All publicly available versions of iGPT are 32x32.
 		parent_params
 		"""
-		super().__init__(model_name, from_cache)
+		super().__init__(model_name, **parent_params)
 
 		self.n_px = n_px
 		self.model_size = model_size
-		self.from_cache = from_cache
 
 		color_clusters_file = "%s/kmeans_centers.npy" % color_clusters_dir
 		self.clusters = np.load(color_clusters_file)  # get color clusters
