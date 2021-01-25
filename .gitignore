@@ -8,3 +8,7 @@ data/cifar*
 .idea
 .log
 notebooks/.log
+.Rproj.user
+.RData
+.RHistory
+ieat.Rproj
