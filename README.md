@@ -2,6 +2,8 @@
 
 Ryan Steed
 
+Forthcoming in FAccT 2021.
+
 The Image Embedding Association Test (iEAT) is a statistical test for bias in unsupervised image representations. Read the paper [here](https://arxiv.org/abs/2010.15052).
 
 ## Installation
