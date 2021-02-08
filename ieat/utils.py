@@ -105,6 +105,14 @@ tests_all = [
 		'Intersectional-Gender-Science-WMWF', 'intersectional/white-male',
 		'intersectional/white-female', 'gender/science', 'gender/liberal-arts'
 	),
+    TestData(
+        'Intersectional-Gender-Science-BMBF', 'intersectional/black-male',
+		'intersectional/black-female', 'gender/science', 'gender/liberal-arts'  
+    ),
+    TestData(
+        'Intersectional-Gender-Science-BMWF', 'intersectional/black-male',
+		'intersectional/white-female', 'gender/science', 'gender/liberal-arts'  
+    ),
 	TestData(
 		'Intersectional-Gender-Career-MF', 'intersectional/male',
 		'intersectional/female', 'gender/career', 'gender/family'
@@ -119,6 +127,14 @@ tests_all = [
 	),
 	TestData(
 		'Intersectional-Gender-Career-WMWF', 'intersectional/white-male',
+		'intersectional/white-female', 'gender/career', 'gender/family'
+	),
+	TestData(
+		'Intersectional-Gender-Career-BMBF', 'intersectional/black-male',
+		'intersectional/black-female', 'gender/career', 'gender/family'
+	),
+	TestData(
+		'Intersectional-Gender-Career-BMWF', 'intersectional/black-male',
 		'intersectional/white-female', 'gender/career', 'gender/family'
 	),
 	# - Valence
