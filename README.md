@@ -1,10 +1,8 @@
 # Image Embedding Association Test
 
-Ryan Steed
+[Ryan Steed](https://rbsteed.com), [Aylin Caliskan](https://www2.seas.gwu.edu/~aylin/)
 
-Forthcoming in FAccT 2021.
-
-The Image Embedding Association Test (iEAT) is a statistical test for bias in unsupervised image representations. Read the paper [here](https://arxiv.org/abs/2010.15052).
+Forthcoming in [FAccT 2021](https://facctconference.org/2021/acceptedpapers.html). Read the paper [here](https://arxiv.org/abs/2010.15052). View code and data [here](https://github.com/ryansteed/ieat).
 
 ## Installation
 
@@ -29,7 +27,7 @@ Documentation for the `ieat` API is published at [rbsteed.com/ieat](https://rbst
 
 To generate the documentation, use `pdoc3`:
 ```
-pdoc3 --html --output-dir docs --force ieat
+pdoc3 --html --output-dir docs --force ieat --template-dir docs/templates
 git subtree push --prefix docs/ieat origin gh-pages
 ```
 
