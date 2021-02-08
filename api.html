@@ -25,15 +25,16 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/ryansteed/ieat/blob/041f995cd1e7b66e68ad40c5ded5d060c43a58a3/ieat/api.py#L0-L209" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">from ieat.models import SENTExtractor, OpenAIExtractor, LogitExtractor, SimCLRExtractor
 from weat.test import Test
+from ieat.utils import tests_all, TestData
 
 import logging
 
 import os
 import glob
-from collections import namedtuple
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -146,117 +147,6 @@ def test_all(
                 results of the tests, mapped by model and test -&gt; categories used, effect size, p value, target sample size,
                 and attribute sample size
         &#34;&#34;&#34;
-
-        TestData = namedtuple(&#39;TestData&#39;, [&#39;name&#39;, &#39;X&#39;, &#39;Y&#39;, &#39;A&#39;, &#39;B&#39;])
-        tests_all = [
-                # Baseline
-                TestData(
-                        &#39;Insect-Flower&#39;, &#39;insect-flower/flower&#39;, &#39;insect-flower/insect&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                # Picture-Picture IATS
-                TestData(&#39;Weapon&#39;, &#39;weapon/white&#39;, &#39;weapon/black&#39;, &#39;weapon/tool&#39;, &#39;weapon/weapon&#39;),
-                TestData(&#39;Weapon (Modern)&#39;, &#39;weapon/white&#39;, &#39;weapon/black&#39;, &#39;weapon/tool-modern&#39;, &#39;weapon/weapon-modern&#39;),
-                TestData(&#39;Native&#39;, &#39;native/euro&#39;, &#39;native/native&#39;, &#39;native/us&#39;, &#39;native/world&#39;),
-                TestData(&#39;Asian&#39;, &#39;asian/european-american&#39;, &#39;asian/asian-american&#39;, &#39;asian/american&#39;, &#39;asian/foreign&#39;),
-                # Valence IATs
-                TestData(&#39;Weight&#39;, &#39;weight/thin&#39;, &#39;weight/fat&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(&#39;Skin-Tone&#39;, &#39;skin-tone/light&#39;, &#39;skin-tone/dark&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(&#39;Disability&#39;, &#39;disabled/disabled&#39;, &#39;disabled/abled&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(
-                        &#39;President - Kennedy vs. Trump&#39;,
-                        &#39;presidents/kennedy&#39;, &#39;presidents/trump&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;President - B. Clinton vs. Trump&#39;,
-                        &#39;presidents/clinton&#39;, &#39;presidents/trump&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;President - Bush vs. Trump&#39;,
-                        &#39;presidents/bush&#39;, &#39;presidents/trump&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;President - Lincoln vs. Trump&#39;,
-                        &#39;presidents/lincoln&#39;, &#39;presidents/trump&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                TestData(&#39;Religion&#39;, &#39;religion/christianity&#39;, &#39;religion/judaism&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(&#39;Sexuality&#39;, &#39;sexuality/gay&#39;, &#39;sexuality/straight&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(&#39;Race&#39;, &#39;race/european-american&#39;, &#39;race/african-american&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(
-                        &#39;Arab-Muslim&#39;,
-                        &#39;arab-muslim/other-people&#39;, &#39;arab-muslim/arab-muslim&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                TestData(&#39;Age&#39;, &#39;age/young&#39;, &#39;age/old&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                # Stereotype IATS
-                TestData(&#39;Gender-Science&#39;, &#39;gender/male&#39;, &#39;gender/female&#39;, &#39;gender/science&#39;, &#39;gender/liberal-arts&#39;),
-                TestData(&#39;Gender-Career&#39;, &#39;gender/male&#39;, &#39;gender/female&#39;, &#39;gender/career&#39;, &#39;gender/family&#39;),
-                # Intersectional IATs
-                # - Gender Stereotypes
-                TestData(
-                        &#39;Intersectional-Gender-Science-MF&#39;, &#39;intersectional/male&#39;,
-                        &#39;intersectional/female&#39;, &#39;gender/science&#39;, &#39;gender/liberal-arts&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Science-WMBM&#39;, &#39;intersectional/white-male&#39;,
-                        &#39;intersectional/black-male&#39;, &#39;gender/science&#39;, &#39;gender/liberal-arts&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Science-WMBF&#39;, &#39;intersectional/white-male&#39;,
-                        &#39;intersectional/black-female&#39;, &#39;gender/science&#39;, &#39;gender/liberal-arts&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Science-WMWF&#39;, &#39;intersectional/white-male&#39;,
-                        &#39;intersectional/white-female&#39;, &#39;gender/science&#39;, &#39;gender/liberal-arts&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Career-MF&#39;, &#39;intersectional/male&#39;,
-                        &#39;intersectional/female&#39;, &#39;gender/career&#39;, &#39;gender/family&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Career-WMBM&#39;, &#39;intersectional/black-male&#39;,
-                        &#39;intersectional/white-male&#39;, &#39;gender/career&#39;, &#39;gender/family&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Career-WMBF&#39;, &#39;intersectional/white-male&#39;,
-                        &#39;intersectional/black-female&#39;, &#39;gender/career&#39;, &#39;gender/family&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Career-WMWF&#39;, &#39;intersectional/white-male&#39;,
-                        &#39;intersectional/white-female&#39;, &#39;gender/career&#39;, &#39;gender/family&#39;
-                ),
-                # - Valence
-                TestData(
-                        &#39;Intersectional-Valence-BW&#39;, &#39;intersectional/white&#39;, &#39;intersectional/black&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-WMBM&#39;, &#39;intersectional/white-male&#39;, &#39;intersectional/black-male&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-WMBF&#39;, &#39;intersectional/white-male&#39;, &#39;intersectional/black-female&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-WMWF&#39;, &#39;intersectional/white-female&#39;, &#39;intersectional/white-male&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-WFBM&#39;, &#39;intersectional/white-female&#39;, &#39;intersectional/black-male&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-BFBM&#39;, &#39;intersectional/black-female&#39;, &#39;intersectional/black-male&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-WFBF&#39;, &#39;intersectional/white-female&#39;, &#39;intersectional/black-female&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-FM&#39;, &#39;intersectional/female&#39;, &#39;intersectional/male&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                )
-        ]
 
         logger.setLevel(progress_level)
 
@@ -399,6 +289,7 @@ if __name__ == &#34;__main__&#34;:
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/ryansteed/ieat/blob/041f995cd1e7b66e68ad40c5ded5d060c43a58a3/ieat/api.py#L19-L93" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def test(
         X, Y, A, B,  # content
@@ -503,6 +394,7 @@ and attribute sample size</dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/ryansteed/ieat/blob/041f995cd1e7b66e68ad40c5ded5d060c43a58a3/ieat/api.py#L96-L147" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def test_all(
                 model_types: dict,
@@ -529,117 +421,6 @@ and attribute sample size</dd>
                 results of the tests, mapped by model and test -&gt; categories used, effect size, p value, target sample size,
                 and attribute sample size
         &#34;&#34;&#34;
-
-        TestData = namedtuple(&#39;TestData&#39;, [&#39;name&#39;, &#39;X&#39;, &#39;Y&#39;, &#39;A&#39;, &#39;B&#39;])
-        tests_all = [
-                # Baseline
-                TestData(
-                        &#39;Insect-Flower&#39;, &#39;insect-flower/flower&#39;, &#39;insect-flower/insect&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                # Picture-Picture IATS
-                TestData(&#39;Weapon&#39;, &#39;weapon/white&#39;, &#39;weapon/black&#39;, &#39;weapon/tool&#39;, &#39;weapon/weapon&#39;),
-                TestData(&#39;Weapon (Modern)&#39;, &#39;weapon/white&#39;, &#39;weapon/black&#39;, &#39;weapon/tool-modern&#39;, &#39;weapon/weapon-modern&#39;),
-                TestData(&#39;Native&#39;, &#39;native/euro&#39;, &#39;native/native&#39;, &#39;native/us&#39;, &#39;native/world&#39;),
-                TestData(&#39;Asian&#39;, &#39;asian/european-american&#39;, &#39;asian/asian-american&#39;, &#39;asian/american&#39;, &#39;asian/foreign&#39;),
-                # Valence IATs
-                TestData(&#39;Weight&#39;, &#39;weight/thin&#39;, &#39;weight/fat&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(&#39;Skin-Tone&#39;, &#39;skin-tone/light&#39;, &#39;skin-tone/dark&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(&#39;Disability&#39;, &#39;disabled/disabled&#39;, &#39;disabled/abled&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(
-                        &#39;President - Kennedy vs. Trump&#39;,
-                        &#39;presidents/kennedy&#39;, &#39;presidents/trump&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;President - B. Clinton vs. Trump&#39;,
-                        &#39;presidents/clinton&#39;, &#39;presidents/trump&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;President - Bush vs. Trump&#39;,
-                        &#39;presidents/bush&#39;, &#39;presidents/trump&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;President - Lincoln vs. Trump&#39;,
-                        &#39;presidents/lincoln&#39;, &#39;presidents/trump&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                TestData(&#39;Religion&#39;, &#39;religion/christianity&#39;, &#39;religion/judaism&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(&#39;Sexuality&#39;, &#39;sexuality/gay&#39;, &#39;sexuality/straight&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(&#39;Race&#39;, &#39;race/european-american&#39;, &#39;race/african-american&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                TestData(
-                        &#39;Arab-Muslim&#39;,
-                        &#39;arab-muslim/other-people&#39;, &#39;arab-muslim/arab-muslim&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;
-                ),
-                TestData(&#39;Age&#39;, &#39;age/young&#39;, &#39;age/old&#39;, &#39;valence/pleasant&#39;, &#39;valence/unpleasant&#39;),
-                # Stereotype IATS
-                TestData(&#39;Gender-Science&#39;, &#39;gender/male&#39;, &#39;gender/female&#39;, &#39;gender/science&#39;, &#39;gender/liberal-arts&#39;),
-                TestData(&#39;Gender-Career&#39;, &#39;gender/male&#39;, &#39;gender/female&#39;, &#39;gender/career&#39;, &#39;gender/family&#39;),
-                # Intersectional IATs
-                # - Gender Stereotypes
-                TestData(
-                        &#39;Intersectional-Gender-Science-MF&#39;, &#39;intersectional/male&#39;,
-                        &#39;intersectional/female&#39;, &#39;gender/science&#39;, &#39;gender/liberal-arts&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Science-WMBM&#39;, &#39;intersectional/white-male&#39;,
-                        &#39;intersectional/black-male&#39;, &#39;gender/science&#39;, &#39;gender/liberal-arts&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Science-WMBF&#39;, &#39;intersectional/white-male&#39;,
-                        &#39;intersectional/black-female&#39;, &#39;gender/science&#39;, &#39;gender/liberal-arts&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Science-WMWF&#39;, &#39;intersectional/white-male&#39;,
-                        &#39;intersectional/white-female&#39;, &#39;gender/science&#39;, &#39;gender/liberal-arts&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Career-MF&#39;, &#39;intersectional/male&#39;,
-                        &#39;intersectional/female&#39;, &#39;gender/career&#39;, &#39;gender/family&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Career-WMBM&#39;, &#39;intersectional/black-male&#39;,
-                        &#39;intersectional/white-male&#39;, &#39;gender/career&#39;, &#39;gender/family&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Career-WMBF&#39;, &#39;intersectional/white-male&#39;,
-                        &#39;intersectional/black-female&#39;, &#39;gender/career&#39;, &#39;gender/family&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Gender-Career-WMWF&#39;, &#39;intersectional/white-male&#39;,
-                        &#39;intersectional/white-female&#39;, &#39;gender/career&#39;, &#39;gender/family&#39;
-                ),
-                # - Valence
-                TestData(
-                        &#39;Intersectional-Valence-BW&#39;, &#39;intersectional/white&#39;, &#39;intersectional/black&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-WMBM&#39;, &#39;intersectional/white-male&#39;, &#39;intersectional/black-male&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-WMBF&#39;, &#39;intersectional/white-male&#39;, &#39;intersectional/black-female&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-WMWF&#39;, &#39;intersectional/white-female&#39;, &#39;intersectional/white-male&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-WFBM&#39;, &#39;intersectional/white-female&#39;, &#39;intersectional/black-male&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-BFBM&#39;, &#39;intersectional/black-female&#39;, &#39;intersectional/black-male&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-WFBF&#39;, &#39;intersectional/white-female&#39;, &#39;intersectional/black-female&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                ),
-                TestData(
-                        &#39;Intersectional-Valence-FM&#39;, &#39;intersectional/female&#39;, &#39;intersectional/male&#39;, &#39;valence/pleasant&#39;,
-                        &#39;valence/unpleasant&#39;
-                )
-        ]
 
         logger.setLevel(progress_level)
 
