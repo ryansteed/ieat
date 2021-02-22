@@ -1,5 +1,7 @@
 # Image Embedding Association Test
 
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
 [Ryan Steed](https://rbsteed.com), [Aylin Caliskan](https://www2.seas.gwu.edu/~aylin/)
 
 Forthcoming in [FAccT 2021](https://facctconference.org/2021/acceptedpapers.html). Read the paper [here](https://arxiv.org/abs/2010.15052). View code and data [here](https://github.com/ryansteed/ieat).
