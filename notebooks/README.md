@@ -2,7 +2,6 @@
 
 - `experiments.ipynb` - notebook for programmatically replicating the tables from the paper with calls from the `ieat` 
 software package
-- `exploration.ipynb` - walkthrough of downloading the iGPT model, performing image sampling, and exploring image 
 completions for potentially biased images  
 - `ieat.ipynb` - demo of the basic use of the `ieat` and `weat` APIs
 - `igpt.ipynb` - demo of embedding extraction methods with iGPT

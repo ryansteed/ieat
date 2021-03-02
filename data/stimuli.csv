@@ -76,9 +76,9 @@ Gender-Career,Family,Parents,Google Image Search,Yes,,3
 Gender-Career,Family,Relatives,Google Image Search,Yes,,3
 Gender-Career,Family,Family,Google Image Search,Yes,,3
 Gender-Career,Family,Home,Google Image Search,Yes,,3
-Gender-Career,Family,Children,Google Image Search,Yes,"Here, must have people in the picture - so ensure there is a gender balance.",3
+Gender-Career,Family,Children,Google Image Search,Yes,,3
 Skin-Tone,Light/Dark,N/A,Project Implicit,Yes,,
-Disability,Disabled,Disabled,Google Image Search,Yes,"disabled, disabled people",10
+Disability,Disabled,Disabled,Google Image Search,Yes,disabled person,10
 Presidents,Trump/Other,N/A,Project Implicit,Yes,,
 Race,African/European American,N/A,Project Implicit,Yes,,
 Age,Old/Young,N/A,Project Implicit,Yes,,

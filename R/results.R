@@ -8,22 +8,6 @@ font_add_google(name = "Fira Sans", family="fira-sans")
 # turn on showtext
 showtext_auto()
 
-# df_linear <-
-#   ggforestplot::df_linear_associations %>%
-#   dplyr::arrange(name) %>%
-#   dplyr::filter(dplyr::row_number() <= 30)
-# 
-# # Forestplot
-# forestplot(
-#   df = df_linear,
-#   estimate = beta,
-#   logodds = FALSE,
-#   colour = trait,
-#   title = "Associations to metabolic traits",
-#   xlab = "1-SD increment in cardiometabolic trait
-#   per 1-SD increment in biomarker concentration"
-# )
-
 df = read.csv("output/results-full.csv") %>% 
   mutate_if(is.factor, as.character) %>%
   mutate_if(is.numeric, as.double) %>%
@@ -99,43 +83,6 @@ plot = forestplot(
   )
 ggsave("output/results-abbrv.png", plot=plot, height=4, width=8, bg="transparent")
 
-intersectional = df %>%
-  filter(grepl("Intersectional", Test))
-plot = forestplot(
-  df = intersectional,
-  name = Test,
-  estimate = d,
-  pvalue = p,
-  psignif = 0.1,
-  ci= 0.9,
-  colour = Model,
-  xlab = "Effect Size (d)",
-  ylab = "Bias Test (iEAT)",
-  size=50,
-  label = "label_parsed"
-) +
-  # ggforce::facet_row(
-  #   facets = ~sig,
-  #   label = "label_parsed",
-  #   scales = "free_y",
-  #   space = "free"
-  # ) +
-  scale_colour_manual(values=cbp1[3:4]) + 
-  geom_text(
-    label=paste0("N=",intersectional$N_a+intersectional$N_t),
-    x=-2,
-    # vjust=2.5,
-    size=3,
-    fontface="italic"
-  ) +
-  coord_cartesian(xlim=c(-2, 2)) +
-  theme(
-    text=element_text(family="fira-sans")
-  )
-ggsave("output/results-abbrv_intersectional.png", plot=plot, height=4, width=8, bg="transparent")
-
-
-
 
 # Intersectional bias confusion matrices
 intersectional = df %>%
@@ -209,17 +156,3 @@ ggplot(data=gendercareer, mapping=aes(x=X, y=Y)) +
   theme_minimal()
 ggsave("output/intersectional_gender-career.png", height=4, width=5, bg="transparent")
 
-# genderscience = intersectional %>%
-#   filter(grepl("Intersectional-Gender-Science", Test), Model == "iGPT") %>%
-#   filter(grepl("-female", Y))
-# genderscience
-# 
-# ggplot(data=genderscience, mapping=aes(x=X, y=Y)) +
-#   geom_tile(aes(fill = d), alpha=ifelse(is.na(genderscience$d), 0, 1)) +
-#   geom_text(aes(label=ifelse(is.na(d), "", round(d,2)))) +
-#   scale_fill_distiller(limits=c(0, 2), palette="Blues", direction=1, na.value="grey50") +
-#   # scale_x_discrete("(Career) Male", labels=c("Black", "White")) +
-#   # scale_y_discrete("(Family) Female", labels=c("Black", "White")) +
-#   theme(
-#     text=element_text(family="fira-sans")
-#   )
