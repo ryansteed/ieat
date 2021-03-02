@@ -23,9 +23,16 @@
 </header>
 <section id="section-intro">
 <p>The Image Embedding Association Test (iEAT) is a statistical test for bias in unsupervised image representations.</p>
-<h1 id="image-embedding-association-test">Image Embedding Association Test</h1>
+<h1 id="image-embedding-association-test-ieat">Image Embedding Association Test (iEAT)</h1>
 <p><a href="https://rbsteed.com">Ryan Steed</a>, <a href="https://www2.seas.gwu.edu/~aylin/">Aylin Caliskan</a></p>
-<p>Forthcoming in <a href="https://facctconference.org/2021/acceptedpapers.html">FAccT 2021</a>. Read the paper <a href="https://arxiv.org/abs/2010.15052">here</a>. View code and data <a href="https://github.com/ryansteed/ieat">here</a>.</p>
+<p>Read the paper <a href="https://arxiv.org/abs/2010.15052">here</a>. View code and data <a href="https://github.com/ryansteed/ieat">here</a>.</p>
+<div class="admonition info">
+<p class="admonition-title">Info:&ensp;iEAT @ <a href="https://facctconference.org/2021/acceptedpapers.html">FAccT 2021</a></p>
+<ul>
+<li><a href="https://rbsteed.com/ieat/docs/docs/slides.pdf">Slides</a></li>
+<li><a href="https://dl.acm.org/doi/10.1145/3442188.3445932">Paper</a></li>
+</ul>
+</div>
 <h2 id="installation">Installation</h2>
 <pre><code class="language-bash"># gather the dependencies for running scripts in this repo
 conda env update environment.yml
@@ -36,20 +43,19 @@ pip install -e weat
 pip install -e .
 </code></pre>
 <h2 id="usage">Usage</h2>
+<p>The <code><a title="ieat" href="#ieat">ieat</a></code> package does not have a CLI. Use it programmatically by accessing the API module (<code><a title="ieat.api" href="api.html">ieat.api</a></code>). </p>
 <p>To run a basic test on a set of images, use the <code>test</code> function in <code><a title="ieat.api" href="api.html">ieat.api</a></code>.
-SimCLR is downloaded automatically - but you must download a pre-trained version of iGPT yourself.
-For an example, see the <a href="#documentation">documentation</a> and <a href="#tutorials-and-replications">tutorials</a>. </p>
+SimCLR is downloaded automatically - but you must download a pre-trained version of iGPT yourself. </p>
+<p>For an example of how to use the API programmatically, see the <a href="#documentation">documentation</a> and <a href="#tutorials-and-replications">tutorials</a>. </p>
+<h3 id="tutorials-and-replications">Tutorials and Replications</h3>
+<p>This repo uses Colab scripts in the <code>notebooks/</code> directory. Check out <code>notebooks/README.md</code> for a full description.</p>
+<p>To open a <code>.ipynb</code> file in Colab, navigate to Colab's <a href="http://colab.research.google.com/github">Github Interface</a> and search for this repo.</p>
 <h3 id="documentation">Documentation</h3>
-<p>The <code><a title="ieat" href="#ieat">ieat</a></code> package does not have a CLI. Use it programmatically by accessing the API module (<code><a title="ieat.api" href="api.html">ieat.api</a></code>).
-Documentation for the <code><a title="ieat" href="#ieat">ieat</a></code> API is published at <a href="https://rbsteed.com/ieat">rbsteed.com/ieat</a>.</p>
+<p>Documentation for the <code><a title="ieat" href="#ieat">ieat</a></code> API is published at <a href="https://rbsteed.com/ieat">rbsteed.com/ieat</a>.</p>
 <p>To generate the documentation, use <code>pdoc3</code>:</p>
 <pre><code>pdoc3 --html --output-dir docs --force ieat --template-dir docs/templates
 git subtree push --prefix docs/ieat origin gh-pages
 </code></pre>
-<h3 id="tutorials-and-replications">Tutorials and Replications</h3>
-<p>This repo uses Colab scripts.</p>
-<p>To open a <code>.ipynb</code> file in Colab, navigate to Colab's <a href="http://colab.research.google.com/github">Github Interface</a> and search for this repo.</p>
-<p>To save changes, choose Save -&gt; Save to Github.</p>
 <h2 id="contents">Contents</h2>
 <ul>
 <li><code>data/</code> - images and other data used for bias tests in the paper</li>
@@ -64,7 +70,7 @@ to generate your own, use the <code>from_cache=False</code> option</li>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/ryansteed/ieat/blob/041f995cd1e7b66e68ad40c5ded5d060c43a58a3/ieat/__init__.py#L0-L4" class="git-link">Browse git</a>
+<a href="https://github.com/ryansteed/ieat/blob/7d41e8ef5b02b9e30cb53424bdafbb3b79b3abe0/ieat/__init__.py#L0-L4" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
 The Image Embedding Association Test (iEAT) is a statistical test for bias in unsupervised image representations.
@@ -101,11 +107,11 @@ The Image Embedding Association Test (iEAT) is a statistical test for bias in un
 <h1>Index</h1>
 <div class="toc">
 <ul>
-<li><a href="#image-embedding-association-test">Image Embedding Association Test</a><ul>
+<li><a href="#image-embedding-association-test-ieat">Image Embedding Association Test (iEAT)</a><ul>
 <li><a href="#installation">Installation</a></li>
 <li><a href="#usage">Usage</a><ul>
-<li><a href="#documentation">Documentation</a></li>
 <li><a href="#tutorials-and-replications">Tutorials and Replications</a></li>
+<li><a href="#documentation">Documentation</a></li>
 </ul>
 </li>
 <li><a href="#contents">Contents</a></li>
