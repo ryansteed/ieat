@@ -7,7 +7,7 @@
 Read the paper [here](https://arxiv.org/abs/2010.15052). View code and data [here](https://github.com/ryansteed/ieat).
 
 .. info:: iEAT @ [FAccT 2021](https://facctconference.org/2021/acceptedpapers.html)
-    - [Slides](https://rbsteed.com/ieat/docs/docs/slides.pdf)
+    - [Slides](https://github.com/ryansteed/ieat/blob/master/docs/docs/slides.pdf)
     - [Paper](https://dl.acm.org/doi/10.1145/3442188.3445932)
 
 ## Installation
